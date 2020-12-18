@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <Adafruit_I2CDevice.h>
-#include "ST7789_16bit Library/ST7789_16bit.hpp"
+#include "ST7789_16bit.hpp"
 
 #include "icons.h"
 
