@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>850</width>
+    <height>651</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>PCPerfMon</string>
+  </property>
+  <property name="tabShape">
+   <enum>QTabWidget::Rounded</enum>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QProgressBar" name="progressBar_cpu">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>50</y>
+      <width>151</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_cpu">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>23</y>
+      <width>151</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>CPU</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_ram">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>103</y>
+      <width>151</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>RAM</string>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="progressBar_ram">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>130</y>
+      <width>151</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+    <property name="format">
+     <string>0.0/0.0 GB (%p%)</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_gpu">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>293</y>
+      <width>151</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>GPU</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_net">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>183</y>
+      <width>151</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Network</string>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="progressBar_gpuLoad">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>320</y>
+      <width>151</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="progressBar_netIn">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>210</y>
+      <width>151</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>1000</number>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+    <property name="textVisible">
+     <bool>false</bool>
+    </property>
+    <property name="format">
+     <string>%v KBit/s</string>
+    </property>
+   </widget>
+   <widget class="QCustomPlot" name="plot_cpu" native="true">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>11</y>
+      <width>611</width>
+      <height>581</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Source Code Pro</family>
+     </font>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="progressBar_netOut">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>240</y>
+      <width>151</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>1000</number>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+    <property name="textVisible">
+     <bool>false</bool>
+    </property>
+    <property name="format">
+     <string>%v KBit/s</string>
+    </property>
+   </widget>
+   <widget class="QCustomPlot" name="plot_ram" native="true">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>11</y>
+      <width>611</width>
+      <height>581</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Source Code Pro</family>
+     </font>
+    </property>
+   </widget>
+   <widget class="QCustomPlot" name="plot_net" native="true">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>11</y>
+      <width>611</width>
+      <height>581</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Source Code Pro</family>
+     </font>
+    </property>
+   </widget>
+   <widget class="QCustomPlot" name="plot_gpu" native="true">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>11</y>
+      <width>611</width>
+      <height>581</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Source Code Pro</family>
+     </font>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_cpu">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>171</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_ram">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>171</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_net">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>180</y>
+      <width>171</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_gpu">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>290</y>
+      <width>171</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_netIn">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>212</y>
+      <width>151</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.0 KBit/s</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_netOut">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>242</y>
+      <width>151</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.0 KBit/s</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="progressBar_gpuVram">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>350</y>
+      <width>151</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+    <property name="format">
+     <string>0.0/0.0 GB (%p%)</string>
+    </property>
+   </widget>
+   <zorder>pushButton_gpu</zorder>
+   <zorder>pushButton_net</zorder>
+   <zorder>pushButton_ram</zorder>
+   <zorder>pushButton_cpu</zorder>
+   <zorder>progressBar_cpu</zorder>
+   <zorder>label_cpu</zorder>
+   <zorder>label_ram</zorder>
+   <zorder>progressBar_ram</zorder>
+   <zorder>label_gpu</zorder>
+   <zorder>label_net</zorder>
+   <zorder>progressBar_gpuLoad</zorder>
+   <zorder>progressBar_netIn</zorder>
+   <zorder>plot_cpu</zorder>
+   <zorder>progressBar_netOut</zorder>
+   <zorder>plot_ram</zorder>
+   <zorder>plot_net</zorder>
+   <zorder>plot_gpu</zorder>
+   <zorder>label_netIn</zorder>
+   <zorder>label_netOut</zorder>
+   <zorder>progressBar_gpuVram</zorder>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>850</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuMain">
+    <property name="title">
+     <string>Main</string>
+    </property>
+    <addaction name="actionSettings"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <addaction name="menuMain"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
