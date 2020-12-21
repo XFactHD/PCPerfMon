@@ -73,6 +73,7 @@ Thumbs.db
 *.a
 *.lib
 *.sys
+*.class
 
 # Build folders
 debug

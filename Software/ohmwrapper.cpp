@@ -3,9 +3,11 @@
 OHMWrapper::OHMWrapper()
 {
     ohm = new QProcess();
-    ohm->setProgram("ohm_reader.exe");
+    //ohm->setProgram("ohm_reader.exe");
     //ohm->setProgram("python");
     //ohm->setArguments({"ohm_reader.py"});
+    ohm->setProgram("java");
+    ohm->setArguments({"Main"});
     ohm->setProcessChannelMode(QProcess::ForwardedErrorChannel);
     ohm->start(QIODevice::ReadWrite | QIODevice::Unbuffered);
     ready = ohm->waitForStarted();
@@ -16,7 +18,7 @@ OHMWrapper::OHMWrapper()
 
     ohm->waitForReadyRead();
     QString result = QString::fromUtf8(ohm->read(64));
-    ready = result.compare("ready\r\n") == 0;
+    ready = result.startsWith("ready");
     if (!ready) {
         std::cout << "ohm_reader.exe encountered an error while starting!" << std::endl;
     }
