@@ -34,7 +34,7 @@ uint16_t OHMWrapper::getCpuClockAvg()
     ohm->write("cpu_clock_avg\r\n");
     ohm->waitForBytesWritten();
 
-    ohm->waitForReadyRead(100);
+    ohm->waitForReadyRead();
     QByteArray data = ohm->read(64);
     return QString::fromUtf8(data).toUInt();
 }
@@ -46,7 +46,7 @@ uint16_t OHMWrapper::getCpuPkgTemp()
     ohm->write("cpu_temp\r\n");
     ohm->waitForBytesWritten();
 
-    ohm->waitForReadyRead(100);
+    ohm->waitForReadyRead();
     QByteArray data = ohm->read(64);
     return QString::fromUtf8(data).toUInt();
 }
@@ -58,7 +58,7 @@ uint32_t OHMWrapper::getCpuPkgPower()
     ohm->write("cpu_power\r\n");
     ohm->waitForBytesWritten();
 
-    ohm->waitForReadyRead(100);
+    ohm->waitForReadyRead();
     QByteArray data = ohm->read(64);
     return QString::fromUtf8(data).toUInt();
 }

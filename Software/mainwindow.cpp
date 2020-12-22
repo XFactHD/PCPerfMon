@@ -52,14 +52,14 @@ MainWindow::MainWindow(QWidget *parent)
     ui->progressBar_gpuLoad->setAttribute(Qt::WA_TransparentForMouseEvents);
     ui->progressBar_gpuVram->setAttribute(Qt::WA_TransparentForMouseEvents);
 
+    qRegisterMetaType<cpu_info_t>("cpu_info_t");
+    qRegisterMetaType<ram_info_t>("ram_info_t");
+    qRegisterMetaType<net_info_t>("net_info_t");
+    qRegisterMetaType<gpu_info_t>("gpu_info_t");
+
     perf = new PerfReader(this);
-    perf->initialize();
-    perf->queryNewData();
-    net_info_t netInfo = perf->getNetInfo();
-    ui->plot_net->yAxis->setRange(0, netInfo.bandwidth);
-    ui->plot_net->yAxis->setRange(0, 100);
-    ui->progressBar_netIn->setRange(0, netInfo.netIn);
-    ui->progressBar_netOut->setRange(0, netInfo.netOut);
+    perf->start();
+    connect(perf, &PerfReader::perfdataReady, this, &MainWindow::on_perfdata_ready);
 
     serialStatus = new QLabel("Serial: Disconnected - Port: [Invalid] - Baudrate: -1", this);
     ui->statusBar->addPermanentWidget(serialStatus);
@@ -191,30 +191,40 @@ void MainWindow::createGPUChart()
 
 void MainWindow::on_timer_timeout()
 {
+    perf->queryNewData();
+}
+
+void MainWindow::on_perfdata_ready(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo)
+{
+    //The first data point must not be displayed
+    static bool first = true;
+    if(first) {
+        first = false;
+
+        ui->progressBar_netIn->setRange(0, netInfo.netIn);
+        ui->progressBar_netOut->setRange(0, netInfo.netOut);
+
+        return;
+    }
+
     constexpr double multiplier = 1; //1 for 1 second interval, 0.5 for half second interval
     static uint64_t idx = 0;
 
-    perf->queryNewData();
-
     double timeStamp = ((double)idx) * multiplier;
 
-    //Get and display CPU data
-    cpu_info_t cpuInfo = perf->getCPUInfo();
+    //Display CPU data
     int cpuLoad = std::round(cpuInfo.cpuLoad * 100.0f);
-    int cpuTemp = cpuInfo.cpuTemp;
     ui->progressBar_cpu->setValue(cpuLoad);
     ui->plot_cpu->graph(0)->addData(timeStamp, cpuLoad);
-    ui->plot_cpu->graph(1)->addData(timeStamp, cpuTemp);
+    ui->plot_cpu->graph(1)->addData(timeStamp, cpuInfo.cpuTemp);
 
-    //Get and display RAM data
-    ram_info_t ramInfo = perf->getRAMInfo();
+    //Display RAM data
     ui->progressBar_ram->setValue(ramInfo.ramLoad);
     QString ramText = QString::number(ramInfo.ramUsed / 1073741824.0, 'f', 1) + "/" + QString::number(ramInfo.ramTotal / 1073741824.0, 'f', 1) + " GB (%p%)";
     ui->progressBar_ram->setFormat(ramText);
     ui->plot_ram->graph(0)->addData(timeStamp, ramInfo.ramLoad);
 
-    //Get and display network data
-    net_info_t netInfo = perf->getNetInfo();
+    //Display network data
     QString netInText = formatScientific(netInfo.netIn, 1, { "KBit/s", "MBit/s", "GBit/s" });
     QString netOutText = formatScientific(netInfo.netOut, 1, { "KBit/s", "MBit/s", "GBit/s" });
     ui->label_netIn->setText(netInText);
@@ -227,11 +237,9 @@ void MainWindow::on_timer_timeout()
     if(max < 100.0) { max = 100.0; }
     ui->plot_net->yAxis->setRange(0, max);
 
-    //Get and display GPU data
-    gpu_info_t gpuInfo = perf->getGPUInfo();
+    //Display GPU data
     ui->progressBar_gpuLoad->setValue(gpuInfo.gpuLoad);
     ui->progressBar_gpuVram->setValue(gpuInfo.vramLoad);
-    //std::cout << gpuInfo.gpuLoad << " " << gpuInfo.vramLoad << " " << gpuInfo.vramUsed << " " << gpuInfo.vramTotal << std::endl;
     QString vramText = QString::number(gpuInfo.vramUsed / 1048576.0, 'f', 1) + "/" + QString::number(gpuInfo.vramTotal / 1048576.0, 'f', 1) + " GB (%p%)";
     ui->progressBar_gpuVram->setFormat(vramText);
     ui->plot_gpu->graph(0)->addData(timeStamp, gpuInfo.gpuLoad);
@@ -312,8 +320,9 @@ void MainWindow::on_pushButton_gpu_clicked()
 
 void MainWindow::on_app_aboutToQuit()
 {
-    perf->shutdown();
     display->shutdown();
+    perf->requestShutdown();
+    while(!perf->isFinished());
 }
 
 QString MainWindow::formatScientific(double value, int precision, QVector<QString> unit)
@@ -359,6 +368,11 @@ void MainWindow::on_sysTrayIcon_activated(QSystemTrayIcon::ActivationReason reas
             raise();
             setFocus();
             activateWindow();
+
+            if(ui->plot_cpu->isVisible()) { ui->plot_cpu->replot(); }
+            if(ui->plot_ram->isVisible()) { ui->plot_ram->replot(); }
+            if(ui->plot_net->isVisible()) { ui->plot_net->replot(); }
+            if(ui->plot_gpu->isVisible()) { ui->plot_gpu->replot(); }
         }
     }
 }
@@ -369,6 +383,12 @@ void MainWindow::on_sysTrayMenu_show()
         showNormal();
         raise();
         setFocus();
+        activateWindow();
+
+        if(ui->plot_cpu->isVisible()) { ui->plot_cpu->replot(); }
+        if(ui->plot_ram->isVisible()) { ui->plot_ram->replot(); }
+        if(ui->plot_net->isVisible()) { ui->plot_net->replot(); }
+        if(ui->plot_gpu->isVisible()) { ui->plot_gpu->replot(); }
     }
 }
 

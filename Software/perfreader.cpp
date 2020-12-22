@@ -1,6 +1,6 @@
 #include "perfreader.h"
 
-PerfReader::PerfReader(QObject *parent) : QObject(parent) { }
+PerfReader::PerfReader(QObject *parent) : QThread(parent) { }
 
 PerfReader::~PerfReader()
 {
@@ -15,6 +15,34 @@ PerfReader::~PerfReader()
     delete ohm;
 }
 
+void PerfReader::run()
+{
+    initialize();
+
+    while (running) {
+        mutex.lock();
+        condition.wait(&mutex);
+        mutex.unlock();
+
+        if(request) {
+            mutex.lock();
+            request = false;
+            mutex.unlock();
+
+            lastQueryStatus = PdhCollectQueryData(query);
+
+            cpu_info_t cpuInfo = getCPUInfo();
+            ram_info_t ramInfo = getRAMInfo();
+            net_info_t netInfo = getNetInfo();
+            gpu_info_t gpuInfo = getGPUInfo();
+
+            emit perfdataReady(cpuInfo, ramInfo, netInfo, gpuInfo);
+        }
+    }
+
+    shutdown();
+}
+
 void PerfReader::initialize()
 {
     getCounterLocalizationTable();
@@ -24,6 +52,14 @@ void PerfReader::initialize()
     gpu = new NvGPUHelper();
     ohm = new OHMWrapper();
     ohm->init();
+}
+
+void PerfReader::requestShutdown()
+{
+    mutex.lock();
+    running = false;
+    condition.wakeOne();
+    mutex.unlock();
 }
 
 void PerfReader::shutdown()
@@ -45,7 +81,10 @@ void PerfReader::shutdown()
 
 void PerfReader::queryNewData()
 {
-    lastQueryStatus = PdhCollectQueryData(query);
+    mutex.lock();
+    request = true;
+    condition.wakeOne();
+    mutex.unlock();
 }
 
 cpu_info_t PerfReader::getCPUInfo()

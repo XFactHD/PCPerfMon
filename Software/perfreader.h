@@ -1,7 +1,9 @@
 #ifndef PERFREADER_H
 #define PERFREADER_H
 
-#include <QObject>
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
 
 #include <iostream>
 
@@ -22,26 +24,26 @@
 #define WPRINT_DEBUG(msg)
 #endif
 
-typedef struct {
+typedef struct cpu_info {
     float cpuLoad;     //in %
     uint16_t cpuClock; //in MHz
     uint16_t cpuTemp;  //in °C
     uint32_t cpuPower; //in W
 } cpu_info_t;
 
-typedef struct {
+typedef struct ram_info {
     uint64_t ramTotal; //in Bytes
     uint64_t ramUsed;  //in Bytes
     int ramLoad;       //in %
 } ram_info_t;
 
-typedef struct {
+typedef struct net_info {
     double bandwidth; //in KBit/s
     double netIn;     //in KBit/s
     double netOut;    //in KBit/s
 } net_info_t;
 
-typedef struct {
+typedef struct gpu_info {
     int gpuLoad;        //in %
     uint16_t gpuClock;  //in MHz
     uint64_t vramTotal; //in Bytes
@@ -51,12 +53,20 @@ typedef struct {
     uint32_t gpuPower;  //in W
 } gpu_info_t;
 
-class PerfReader : public QObject
+Q_DECLARE_METATYPE(cpu_info);
+Q_DECLARE_METATYPE(ram_info);
+Q_DECLARE_METATYPE(net_info);
+Q_DECLARE_METATYPE(gpu_info);
+
+class PerfReader : public QThread
 {
     Q_OBJECT
 public:
     explicit PerfReader(QObject *parent = nullptr);
     ~PerfReader();
+
+    void run();
+    void requestShutdown();
 
     void initialize();
     void shutdown();
@@ -67,6 +77,9 @@ public:
     ram_info_t getRAMInfo();
     net_info_t getNetInfo();
     gpu_info_t getGPUInfo();
+
+signals:
+    void perfdataReady(cpu_info_t, ram_info_t, net_info_t, gpu_info_t);
 
 private:
     void initializeNetCounters();
@@ -112,6 +125,11 @@ private:
     PPDH_FMT_COUNTERVALUE netOutValue = new PDH_FMT_COUNTERVALUE;
 
     PDH_STATUS lastQueryStatus = ERROR_SUCCESS;
+
+    bool running = true;
+    bool request = false;
+    QMutex mutex;
+    QWaitCondition condition;
 
     NvGPUHelper* gpu;
     OHMWrapper* ohm;

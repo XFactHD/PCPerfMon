@@ -40,6 +40,8 @@ public slots:
 private slots:
     void on_timer_timeout();
 
+    void on_perfdata_ready(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo);
+
     void on_pushButton_cpu_clicked();
 
     void on_pushButton_ram_clicked();
