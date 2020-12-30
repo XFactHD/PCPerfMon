@@ -24,7 +24,8 @@ DisplayHandler::DisplayHandler(QObject *parent) : QObject(parent)
         QString msg = "An error occured while opening COM port!\n";
         msg += "Port: " + comPort + "\nBaudrate: " + QString::number(baudrate) + "\n";
         msg += "Error code: " + QString::number(serial->error());
-        errorMsg->showMessage(msg);
+        //errorMsg->showMessage(msg);
+        qWarning("%s", msg.toStdString().c_str());
     }
     else {
         sendPacket(CMD_STARTUP, nullptr, 0);

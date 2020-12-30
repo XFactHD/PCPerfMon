@@ -5,11 +5,12 @@
 #include <QProcess>
 #include <iostream>
 
-class OHMWrapper
+class OHMWrapper : public QObject
 {
+    Q_OBJECT
 public:
-    OHMWrapper();
-    ~OHMWrapper() { delete ohm; }
+    explicit OHMWrapper(QObject* parent = nullptr);
+    virtual ~OHMWrapper() { delete ohm; }
 
     void init() {}
     void shutdown();
@@ -19,6 +20,9 @@ public:
     uint16_t getCpuClockAvg();
     uint16_t getCpuPkgTemp();
     uint32_t getCpuPkgPower();
+
+private slots:
+    void on_stderr_readyRead();
 
 private:
     QProcess* ohm;

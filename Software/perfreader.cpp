@@ -65,9 +65,8 @@ void PerfReader::requestShutdown()
 void PerfReader::shutdown()
 {
 #ifdef DEBUG
-    std::cout << "Shutting down PerfReader" << std::endl;
+    qDebug("Shutting down PerfReader");
 #endif
-
     if(netBwCounter != NULL) { PdhRemoveCounter(netBwCounter); }
     if(netInCounter != NULL) { PdhRemoveCounter(netInCounter); }
     if(netOutCounter != NULL) { PdhRemoveCounter(netOutCounter); }

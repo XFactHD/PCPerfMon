@@ -8,7 +8,7 @@ NvGPUHelper::NvGPUHelper(QObject *parent) : QObject(parent)
 
     // nvapi_QueryInterface is a function used to retrieve other internal functions in nvapi.dll
     NvAPI_QueryInterface = (NvAPI_QueryInterface_t)GetProcAddress(hmod, "nvapi_QueryInterface");
-    if(NvAPI_QueryInterface == NULL) { std::cerr << "Failed to get NvAPI_QueryInterface from nvapi.dll." << std::endl; return; }
+    if(NvAPI_QueryInterface == NULL) { qCritical("Failed to get NvAPI_QueryInterface from nvapi.dll."); return; }
 
     // Some useful internal functions that aren't exported by nvapi.dll
     NvAPI_Initialize =                          (NvAPI_Initialize_t)                        (*NvAPI_QueryInterface)(DLL_ADDR_NvAPI_Initialize);
@@ -27,7 +27,7 @@ NvGPUHelper::NvGPUHelper(QObject *parent) : QObject(parent)
         NvAPI_GPU_GetThermalSettings == NULL || NvAPI_GPU_GetAllClockFrequencies == NULL ||
         NvAPI_GPU_GetShortName == NULL || NvAPI_Unload == NULL)
     {
-        std::cerr << "Failed to get private functions in nvapi.dll" << std::endl;
+        qCritical("Failed to get private functions in nvapi.dll");
         return;
     }
 

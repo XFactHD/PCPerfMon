@@ -1,18 +1,17 @@
 #include "ohmwrapper.h"
 
-OHMWrapper::OHMWrapper()
+OHMWrapper::OHMWrapper(QObject* parent) : QObject(parent)
 {
     ohm = new QProcess();
     //ohm->setProgram("ohm_reader.exe");
-    //ohm->setProgram("python");
-    //ohm->setArguments({"ohm_reader.py"});
     ohm->setProgram("java");
     ohm->setArguments({"Main"});
-    ohm->setProcessChannelMode(QProcess::ForwardedErrorChannel);
+    connect(ohm, &QProcess::readyReadStandardError, this, &OHMWrapper::on_stderr_readyRead);
+
     ohm->start(QIODevice::ReadWrite | QIODevice::Unbuffered);
     ready = ohm->waitForStarted();
     if (!ready) {
-        std::cout << "Failed to start ohm_reader.exe!" << std::endl;
+        qWarning("Failed to start ohm_reader.exe!");
         return;
     }
 
@@ -20,10 +19,10 @@ OHMWrapper::OHMWrapper()
     QString result = QString::fromUtf8(ohm->read(64));
     ready = result.startsWith("ready");
     if (!ready) {
-        std::cout << "ohm_reader.exe encountered an error while starting!" << std::endl;
+        qWarning("ohm_reader.exe encountered an error while starting!");
     }
     else {
-        std::cout << "ohm_reader.exe started succesfully!" << std::endl;
+        qInfo("ohm_reader.exe started succesfully!");
     }
 }
 
@@ -70,4 +69,11 @@ void OHMWrapper::shutdown()
         ohm->closeWriteChannel();
         ohm->waitForFinished(1000);
     }
+}
+
+
+
+void OHMWrapper::on_stderr_readyRead()
+{
+    qWarning("%s", ohm->readAllStandardError().toStdString().c_str());
 }
