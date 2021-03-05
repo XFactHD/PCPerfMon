@@ -9,32 +9,19 @@ DisplayHandler::DisplayHandler(QObject *parent) : QObject(parent)
         openSettingsDialog();
     }
 
-    bool active = settings.value("drive_display", true).toBool();
-    QString comPort = settings.value("com_port", "COM1").toString();
-    quint32 baudrate = settings.value("baudrate", 115200).toUInt();
+    active = settings.value("drive_display", true).toBool();
 
     if(!active) { return; }
 
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &DisplayHandler::checkPortAck);
 
-    serial = new QSerialPort(comPort, parent);
-    serial->setBaudRate(baudrate);
-    if (!serial->open(QIODevice::ReadWrite)) {
-        QString msg = "An error occured while opening COM port!\n";
-        msg += "Port: " + comPort + "\nBaudrate: " + QString::number(baudrate) + "\n";
-        msg += "Error code: " + QString::number(serial->error());
-        //errorMsg->showMessage(msg);
-        qWarning("%s", msg.toStdString().c_str());
-    }
-    else {
-        sendPacket(CMD_STARTUP, nullptr, 0);
-    }
+    startCOM();
 }
 
 void DisplayHandler::sendPerformanceData(cpu_info_t &cpuInfo, ram_info_t &ramInfo, net_info_t &netInfo, gpu_info_t &gpuInfo)
 {
-    if (!isConnected()) { return; }
+    if (!active || !isConnected()) { return; }
 
     data_point_t data[17];
     data[0] =  { data_type_t::CPU_LOAD, (uint64_t)std::round(cpuInfo.cpuLoad * 100.0f)};
@@ -60,9 +47,11 @@ void DisplayHandler::sendPerformanceData(cpu_info_t &cpuInfo, ram_info_t &ramInf
 
 DisplayHandler::~DisplayHandler()
 {
-    delete serial;
     delete errorMsg;
-    delete timer;
+    if(active) {
+        delete serial;
+        delete timer;
+    }
 }
 
 void DisplayHandler::openSettingsDialog()
@@ -71,16 +60,50 @@ void DisplayHandler::openSettingsDialog()
     options.exec();
 }
 
+void DisplayHandler::restartCOM()
+{
+    if(!active) { return; }
+
+    stopCOM();
+    delete serial;
+    startCOM();
+}
+
 void DisplayHandler::shutdown()
 {
-    if (isConnected()) {
+    stopCOM();
+}
+
+
+
+void DisplayHandler::startCOM()
+{
+    QSettings settings;
+    QString comPort = settings.value("com_port", "COM1").toString();
+    quint32 baudrate = settings.value("baudrate", 115200).toUInt();
+
+    serial = new QSerialPort(comPort, this);
+    serial->setBaudRate(baudrate);
+    if (!serial->open(QIODevice::ReadWrite)) {
+        QString msg = "An error occured while opening COM port!\n";
+        msg += "Port: " + comPort + "\nBaudrate: " + QString::number(baudrate) + "\n";
+        msg += "Error code: " + QString::number(serial->error());
+        //errorMsg->showMessage(msg);
+        qWarning("%s", msg.toStdString().c_str());
+    }
+    else {
+        sendPacket(CMD_STARTUP, nullptr, 0);
+    }
+}
+
+void DisplayHandler::stopCOM()
+{
+    if (active && isConnected()) {
         sendPacket(CMD_SHUTDOWN, nullptr, 0);
         serial->flush();
         serial->waitForBytesWritten();
     }
 }
-
-
 
 void DisplayHandler::sendPacket(uint8_t cmd, uint8_t* data, uint8_t size)
 {

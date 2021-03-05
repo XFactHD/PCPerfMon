@@ -396,6 +396,7 @@
      <string>Main</string>
     </property>
     <addaction name="actionSettings"/>
+    <addaction name="actionRestart_COM"/>
     <addaction name="actionExit"/>
    </widget>
    <addaction name="menuMain"/>
@@ -409,6 +410,11 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionRestart_COM">
+   <property name="text">
+    <string>Restart COM</string>
    </property>
   </action>
  </widget>

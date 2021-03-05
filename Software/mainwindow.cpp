@@ -67,7 +67,8 @@ MainWindow::MainWindow(QWidget *parent)
     display = new DisplayHandler(this);
 
     connect(ui->menuMain->actions().at(0), &QAction::triggered, display, &DisplayHandler::openSettingsDialog);
-    connect(ui->menuMain->actions().at(1), &QAction::triggered, this, &QCoreApplication::quit);
+    connect(ui->menuMain->actions().at(1), &QAction::triggered, display, &DisplayHandler::restartCOM);
+    connect(ui->menuMain->actions().at(2), &QAction::triggered, this, &QCoreApplication::quit);
 
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::on_timer_timeout);

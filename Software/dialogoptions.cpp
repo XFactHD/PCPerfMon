@@ -11,6 +11,9 @@ DialogOptions::DialogOptions(QWidget *parent) :
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 
     QSettings settings;
+    if(settings.contains("drive_display")) {
+        ui->checkBox_active->setChecked(settings.value("drive_display").toBool());
+    }
     if(settings.contains("com_port")) {
         ui->lineEdit_com_port->setText(settings.value("com_port").toString());
     }
@@ -28,6 +31,7 @@ void DialogOptions::on_DialogOptions_finished(int result)
 {
     if(result == 1) {
         QSettings settings;
+        settings.setValue("drive_display", ui->checkBox_active->isChecked());
         settings.setValue("com_port", ui->lineEdit_com_port->text());
         settings.setValue("baudrate", ui->lineEdit_baudrate->text().toUInt());
     }

@@ -52,18 +52,22 @@ public:
     ~DisplayHandler();
 
     void sendPerformanceData(cpu_info_t& cpuInfo, ram_info_t& ramInfo, net_info_t& netInfo, gpu_info_t& gpuInfo);
-    void openSettingsDialog();
 
     bool isConnected() { return serial != nullptr && serial->isOpen(); }
     QString getComPort() { return serial != nullptr ? serial->portName() : "[Invalid]"; }
     qint32 getBaudrate() { return serial != nullptr ? serial->baudRate() : -1; }
     void shutdown();
 
-signals:
+public slots:
+    void openSettingsDialog();
+    void restartCOM();
 
 private:
+    void startCOM();
+    void stopCOM();
     void sendPacket(uint8_t cmd, uint8_t* data, uint8_t size);
 
+    bool active = false;
     QSerialPort* serial = nullptr;
     QErrorMessage* errorMsg;
     QTimer* timer;
