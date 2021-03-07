@@ -139,6 +139,9 @@ void MainWindow::createCPUChart()
     ui->plot_cpu->xAxis->setRange(0, 60, Qt::AlignLeft);
     ui->plot_cpu->yAxis->setRange(0, 100);
 
+    ui->plot_cpu->axisRect()->setAutoMargins(QCP::msLeft | QCP::msTop | QCP::msRight);
+    ui->plot_cpu->axisRect()->setMargins(QMargins(0, 0, 0, 24));
+
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
     ui->plot_cpu->xAxis->setTicker(timeTicker);
@@ -166,6 +169,9 @@ void MainWindow::createRAMChart()
     ui->plot_ram->xAxis->setRange(0, 60, Qt::AlignLeft);
     ui->plot_ram->yAxis->setRange(0, 100);
 
+    ui->plot_ram->axisRect()->setAutoMargins(QCP::msLeft | QCP::msTop | QCP::msRight);
+    ui->plot_ram->axisRect()->setMargins(QMargins(0, 0, 0, 24));
+
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
     ui->plot_ram->xAxis->setTicker(timeTicker);
@@ -190,6 +196,9 @@ void MainWindow::createNetChart()
 {
     ui->plot_net->xAxis->setRange(0, 60, Qt::AlignLeft);
     ui->plot_net->yAxis->setRange(0, 100);
+
+    ui->plot_net->axisRect()->setAutoMargins(QCP::msLeft | QCP::msTop | QCP::msRight);
+    ui->plot_net->axisRect()->setMargins(QMargins(0, 0, 0, 24));
 
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
@@ -220,6 +229,9 @@ void MainWindow::createGPUChart()
 {
     ui->plot_gpu->xAxis->setRange(0, 60, Qt::AlignLeft);
     ui->plot_gpu->yAxis->setRange(0, 100);
+
+    ui->plot_gpu->axisRect()->setAutoMargins(QCP::msLeft | QCP::msTop | QCP::msRight);
+    ui->plot_gpu->axisRect()->setMargins(QMargins(0, 0, 0, 24));
 
     QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
     timeTicker->setTimeFormat("%h:%m:%s");
@@ -325,7 +337,7 @@ void MainWindow::on_perfdata_ready(cpu_info_t cpuInfo, ram_info_t ramInfo, net_i
     display->sendPerformanceData(cpuInfo, ramInfo, netInfo, gpuInfo);
 
     const char* connected = display->isConnected() ? "Connected" : "Disconnected";
-    QString text = QString("Serial: %1 | Port: %2 | Baudrate: %3").arg(connected, 12).arg(display->getComPort(), 9).arg(display->getBaudrate(), 10);
+    QString text = QString("Serial: %1 | Port: %2 | Baudrate: %3").arg(connected, 12).arg(display->getComPort(), 5).arg(display->getBaudrate(), 10);
     serialStatus->setText(text);
 
     idx++;

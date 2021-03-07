@@ -90,7 +90,6 @@ void DisplayHandler::startCOM()
         QString msg = "An error occured while opening COM port!\n";
         msg += "Port: " + comPort + "\nBaudrate: " + QString::number(baudrate) + "\n";
         msg += "Error code: " + QString::number(serial->error());
-        //errorMsg->showMessage(msg);
         qWarning("%s", msg.toStdString().c_str());
     }
     else {
@@ -135,7 +134,7 @@ void DisplayHandler::sendPacket(uint8_t cmd, uint8_t* data, uint8_t size)
 void DisplayHandler::checkPortAck()
 {
     //Shitty workaround for two successive commands crashing the connection when the receiver is still working on the first command
-    while (timer->remainingTime() > ACK_TIMEOUT) {
+    while (timer->remainingTime() > ACK_TIMEOUT / 2) {
         loop.processEvents();
     }
 
