@@ -1,13 +1,7 @@
 #include <Arduino.h>
 
 #include "display.hpp"
-#include "data.hpp"
-
-#define CMD_STARTUP 0x10
-#define CMD_SHUTDOWN 0x11
-#define CMD_DATA 0x20
-#define CMD_CFG 0x30
-#define CMD_ACK 0x99
+#include "cmd.hpp"
 
 void setup() {
     initDisplay();
@@ -42,10 +36,11 @@ void loop() {
                 break;
             }
             case CMD_DATA: {
-                parseData(data, length);
+                printData(data, length);
                 break;
             }
             case CMD_CFG: {
+                handleConfig(data, length);
                 break;
             }
             default: break;

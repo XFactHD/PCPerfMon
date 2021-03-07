@@ -7,6 +7,7 @@
 #include "ST7789_16bit.hpp"
 
 #include "icons.h"
+#include "data.hpp"
 
 #define TFT_RST 0
 #define TFT_RD  17
@@ -17,11 +18,15 @@
 
 void initDisplay();
 
+void configureColors();
 void drawBackground();
+void printLabels();
+
+void printData(uint8_t* data, uint8_t length);
+void printScientific(double value, double divider, int len, int decimals, const char** units, int steps);
 
 void enableDisplay();
 void disableDisplay();
-
-ST7789* getDisplay();
+void switchDarkMode(bool on);
 
 #endif //DISPLAY_HPP

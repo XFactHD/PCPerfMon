@@ -22,14 +22,17 @@ enum class data_type_t {
     GPU_VRAM_LOAD,
     GPU_VRAM_TOTAL,
     GPU_VRAM_USED,
-    GPU_POWER
+    GPU_POWER,
+    DATA_TYPE_END //End marker
 };
+
+inline data_type_t& operator++(data_type_t& type) {
+    return type = static_cast<data_type_t>(std::underlying_type<data_type_t>::type(type) + 1);
+}
 
 typedef struct __attribute__((packed)) {
     data_type_t type;
     uint64_t data;
 } data_point_t;
-
-void parseData(uint8_t* data, uint8_t length);
 
 #endif //DATA_HPP
