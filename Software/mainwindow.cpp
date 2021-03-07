@@ -352,6 +352,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_cpu_clicked()
 {
+    ui->pushButton_cpu->setChecked(true);
+    ui->pushButton_ram->setChecked(false);
+    ui->pushButton_net->setChecked(false);
+    ui->pushButton_gpu->setChecked(false);
+
     ui->plot_cpu->setVisible(true);
     ui->plot_ram->setVisible(false);
     ui->plot_net->setVisible(false);
@@ -362,6 +367,11 @@ void MainWindow::on_pushButton_cpu_clicked()
 
 void MainWindow::on_pushButton_ram_clicked()
 {
+    ui->pushButton_cpu->setChecked(false);
+    ui->pushButton_ram->setChecked(true);
+    ui->pushButton_net->setChecked(false);
+    ui->pushButton_gpu->setChecked(false);
+
     ui->plot_cpu->setVisible(false);
     ui->plot_ram->setVisible(true);
     ui->plot_net->setVisible(false);
@@ -372,6 +382,11 @@ void MainWindow::on_pushButton_ram_clicked()
 
 void MainWindow::on_pushButton_net_clicked()
 {
+    ui->pushButton_cpu->setChecked(false);
+    ui->pushButton_ram->setChecked(false);
+    ui->pushButton_net->setChecked(true);
+    ui->pushButton_gpu->setChecked(false);
+
     ui->plot_cpu->setVisible(false);
     ui->plot_ram->setVisible(false);
     ui->plot_net->setVisible(true);
@@ -382,6 +397,11 @@ void MainWindow::on_pushButton_net_clicked()
 
 void MainWindow::on_pushButton_gpu_clicked()
 {
+    ui->pushButton_cpu->setChecked(false);
+    ui->pushButton_ram->setChecked(false);
+    ui->pushButton_net->setChecked(false);
+    ui->pushButton_gpu->setChecked(true);
+
     ui->plot_cpu->setVisible(false);
     ui->plot_ram->setVisible(false);
     ui->plot_net->setVisible(false);
@@ -449,7 +469,7 @@ double MainWindow::findHighest(QSharedPointer<QCPGraphDataContainer> data1, QSha
 void MainWindow::on_sysTrayIcon_activated(QSystemTrayIcon::ActivationReason reason)
 {
     if(reason == QSystemTrayIcon::Trigger) {
-        sysTrayIcon->activated(QSystemTrayIcon::Context);
+        emit sysTrayIcon->activated(QSystemTrayIcon::Context);
     }
     else if(reason == QSystemTrayIcon::DoubleClick) {
         if(isHidden()) {
