@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>250</width>
-    <height>140</height>
+    <width>300</width>
+    <height>200</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -21,8 +21,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>250</width>
-    <height>180</height>
+    <width>300</width>
+    <height>250</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -31,8 +31,8 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>100</y>
+     <x>100</x>
+     <y>160</y>
      <width>191</width>
      <height>32</height>
     </rect>
@@ -73,7 +73,7 @@
   <widget class="QLineEdit" name="lineEdit_com_port">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>170</x>
      <y>10</y>
      <width>121</width>
      <height>22</height>
@@ -86,7 +86,7 @@
   <widget class="QLineEdit" name="lineEdit_baudrate">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>170</x>
      <y>40</y>
      <width>121</width>
      <height>22</height>
@@ -99,7 +99,7 @@
     <number>11</number>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="label_active">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -115,9 +115,9 @@
   <widget class="QCheckBox" name="checkBox_active">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>170</x>
      <y>70</y>
-     <width>16</width>
+     <width>21</width>
      <height>20</height>
     </rect>
    </property>
@@ -126,6 +126,58 @@
    </property>
    <property name="checked">
     <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_app_dark">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>100</y>
+     <width>131</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>App dark mode</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_disp_dark">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>130</y>
+     <width>141</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Display dark mode</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_app_dark">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>100</y>
+     <width>21</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_disp_dark">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>130</y>
+     <width>21</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
  </widget>

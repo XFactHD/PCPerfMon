@@ -20,6 +20,10 @@ public:
 
     Ui::DialogOptions* getUi() { return ui; }
 
+signals:
+    void setAppDarkMode(bool dark);
+    void setDisplayDarkMode(bool dark);
+
 private slots:
     void on_DialogOptions_finished(int result);
 

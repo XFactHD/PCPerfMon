@@ -20,6 +20,12 @@ DialogOptions::DialogOptions(QWidget *parent) :
     if(settings.contains("baudrate")) {
         ui->lineEdit_baudrate->setText(QString::number(settings.value("baudrate").toUInt()));
     }
+    if(settings.contains("app_dark_mode")) {
+        ui->checkBox_app_dark->setChecked(settings.value("app_dark_mode").toBool());
+    }
+    if(settings.contains("display_dark_mode")) {
+        ui->checkBox_disp_dark->setChecked(settings.value("display_dark_mode").toBool());
+    }
 }
 
 DialogOptions::~DialogOptions()
@@ -34,6 +40,14 @@ void DialogOptions::on_DialogOptions_finished(int result)
         settings.setValue("drive_display", ui->checkBox_active->isChecked());
         settings.setValue("com_port", ui->lineEdit_com_port->text());
         settings.setValue("baudrate", ui->lineEdit_baudrate->text().toUInt());
+
+        bool appDark = ui->checkBox_app_dark->isChecked();
+        settings.setValue("app_dark_mode", appDark);
+        emit setAppDarkMode(appDark);
+
+        bool dispDark = ui->checkBox_disp_dark->isChecked();
+        settings.setValue("display_dark_mode", dispDark);
+        emit setDisplayDarkMode(dispDark);
     }
 }
 

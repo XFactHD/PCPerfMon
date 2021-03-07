@@ -401,7 +401,11 @@
    </widget>
    <addaction name="menuMain"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="sizeGripEnabled">
+    <bool>false</bool>
+   </property>
+  </widget>
   <action name="actionSettings">
    <property name="text">
     <string>Settings</string>

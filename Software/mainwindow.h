@@ -9,6 +9,7 @@
 #include "qcustomplot.h"
 #include "perfreader.h"
 #include "displayhandler.h"
+#include "dialogoptions.h"
 
 //#define DEBUG
 
@@ -33,6 +34,8 @@ public:
     ~MainWindow();
 
 public slots:
+    void on_settings_setAppDarkMode(bool dark);
+
     void on_app_aboutToQuit();
 
     void on_sysTrayMenu_show();
@@ -50,12 +53,16 @@ private slots:
 
     void on_pushButton_gpu_clicked();
 
+    void on_menu_open_settings();
+
     void on_sysTrayIcon_activated(QSystemTrayIcon::ActivationReason reason);
 
 protected:
     virtual void changeEvent(QEvent* event);
 
 private:
+    void configureAppStyle(bool dark);
+    void setPlotColors(QCustomPlot* plot, QColor background, QColor foreground);
     void createCPUChart();
     void createRAMChart();
     void createNetChart();
@@ -69,6 +76,9 @@ private:
     QMenu* sysTrayMenu;
 
     QFont monoFont;
+    QPalette lightPalette;
+    QPalette darkPalette;
+    bool darkMode;
 
     PerfReader* perf;
     QTimer* timer;

@@ -7,8 +7,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     monoFont = QFont("Monospaced");
     monoFont.setStyleHint(QFont::Monospace);
+    setFont(monoFont);
 
-    this->setFont(monoFont);
     ui->setupUi(this);
 
     //Disable window resizing and maximizing
@@ -33,6 +33,24 @@ MainWindow::MainWindow(QWidget *parent)
     //Configure application details
     QCoreApplication::setOrganizationName("dc");
     QCoreApplication::setApplicationName("PCPerfMon");
+
+    //Configure dark mode palette
+    darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
+    darkPalette.setColor(QPalette::WindowText, Qt::white);
+    darkPalette.setColor(QPalette::Base, QColor(25, 25, 25));
+    darkPalette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+    darkPalette.setColor(QPalette::ToolTipBase, Qt::black);
+    darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+    darkPalette.setColor(QPalette::Text, Qt::white);
+    darkPalette.setColor(QPalette::Button, QColor(63, 63, 63));
+    darkPalette.setColor(QPalette::ButtonText, Qt::white);
+    darkPalette.setColor(QPalette::BrightText, Qt::red);
+    darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+    darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+    darkPalette.setColor(QPalette::HighlightedText, Qt::black);
+
+    darkMode = QSettings().value("app_dark_mode").toBool();
+    configureAppStyle(darkMode);
 
     createCPUChart();
     createRAMChart();
@@ -62,17 +80,58 @@ MainWindow::MainWindow(QWidget *parent)
     connect(perf, &PerfReader::perfdataReady, this, &MainWindow::on_perfdata_ready);
 
     serialStatus = new QLabel("Serial: Disconnected - Port: [Invalid] - Baudrate: -1", this);
+    serialStatus->setContentsMargins(0, 0, 10, 0);
     ui->statusBar->addPermanentWidget(serialStatus);
 
     display = new DisplayHandler(this);
 
-    connect(ui->menuMain->actions().at(0), &QAction::triggered, display, &DisplayHandler::openSettingsDialog);
+    connect(ui->menuMain->actions().at(0), &QAction::triggered, this, &MainWindow::on_menu_open_settings);
     connect(ui->menuMain->actions().at(1), &QAction::triggered, display, &DisplayHandler::restartCOM);
     connect(ui->menuMain->actions().at(2), &QAction::triggered, this, &QCoreApplication::quit);
 
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::on_timer_timeout);
     timer->start(1000);
+}
+
+void MainWindow::configureAppStyle(bool dark)
+{
+    if (dark) {
+        setPalette(darkPalette);
+
+        ui->menuMain->setPalette(darkPalette);
+
+        QColor darkBg(63, 63, 63);
+        setPlotColors(ui->plot_cpu, darkBg, Qt::white);
+        setPlotColors(ui->plot_ram, darkBg, Qt::white);
+        setPlotColors(ui->plot_net, darkBg, Qt::white);
+        setPlotColors(ui->plot_gpu, darkBg, Qt::white);
+    }
+    else {
+        setPalette(lightPalette);
+
+        ui->menuMain->setPalette(lightPalette);
+
+        setPlotColors(ui->plot_cpu, Qt::white, Qt::black);
+        setPlotColors(ui->plot_ram, Qt::white, Qt::black);
+        setPlotColors(ui->plot_net, Qt::white, Qt::black);
+        setPlotColors(ui->plot_gpu, Qt::white, Qt::black);
+    }
+}
+
+void MainWindow::setPlotColors(QCustomPlot* plot, QColor background, QColor foreground)
+{
+    plot->setBackground(QBrush(background));
+    plot->xAxis->setBasePen(QPen(foreground));
+    plot->xAxis->setLabelColor(foreground);
+    plot->xAxis->setTickPen(QPen(foreground));
+    plot->xAxis->setSubTickPen(QPen(foreground));
+    plot->xAxis->setTickLabelColor(foreground);
+    plot->yAxis->setBasePen(QPen(foreground));
+    plot->yAxis->setLabelColor(foreground);
+    plot->yAxis->setTickPen(QPen(foreground));
+    plot->yAxis->setSubTickPen(QPen(foreground));
+    plot->yAxis->setTickLabelColor(foreground);
 }
 
 void MainWindow::createCPUChart()
@@ -317,6 +376,23 @@ void MainWindow::on_pushButton_gpu_clicked()
     ui->plot_gpu->setVisible(true);
 
     ui->plot_gpu->replot();
+}
+
+void MainWindow::on_menu_open_settings()
+{
+    DialogOptions options((QWidget*)parent());
+    options.setPalette(darkMode ? darkPalette : lightPalette);
+
+    connect(&options, &DialogOptions::setAppDarkMode, this, &MainWindow::on_settings_setAppDarkMode);
+    connect(&options, &DialogOptions::setDisplayDarkMode, display, &DisplayHandler::on_settings_setDisplayDarkMode);
+
+    options.exec();
+}
+
+void MainWindow::on_settings_setAppDarkMode(bool dark)
+{
+    darkMode = dark;
+    configureAppStyle(dark);
 }
 
 void MainWindow::on_app_aboutToQuit()

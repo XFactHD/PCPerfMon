@@ -50,6 +50,8 @@ int main(int argc, char *argv[])
 
     //Create and show window
     QApplication app(argc, argv);
+    app.setStyle(QStyleFactory::create("Fusion"));
+
     MainWindow w;
     if(app.arguments().contains("--startInTray")) {
         w.showMinimized();

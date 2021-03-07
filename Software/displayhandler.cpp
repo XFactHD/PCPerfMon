@@ -2,11 +2,12 @@
 
 DisplayHandler::DisplayHandler(QObject *parent) : QObject(parent)
 {
-    errorMsg = new QErrorMessage((QWidget*)parent);
-
     QSettings settings;
-    if (!settings.contains("com_port") || !settings.contains("baudrate")) {
-        openSettingsDialog();
+    if (!settings.contains("com_port")) {
+        settings.setValue("com_port", "COM1");
+    }
+    if (!settings.contains("baudrate")) {
+        settings.setValue("baudrate", 1000000);
     }
 
     active = settings.value("drive_display", true).toBool();
@@ -45,19 +46,20 @@ void DisplayHandler::sendPerformanceData(cpu_info_t &cpuInfo, ram_info_t &ramInf
     sendPacket(CMD_DATA, (uint8_t*)data, sizeof(data));
 }
 
+void DisplayHandler::on_settings_setDisplayDarkMode(bool dark)
+{
+    if (!active || !isConnected()) { return; }
+
+    uint8_t data[] = { CFG_DARK_MODE, dark };
+    sendPacket(CMD_CFG, data, 2);
+}
+
 DisplayHandler::~DisplayHandler()
 {
-    delete errorMsg;
     if(active) {
         delete serial;
         delete timer;
     }
-}
-
-void DisplayHandler::openSettingsDialog()
-{
-    DialogOptions options((QWidget*)parent());
-    options.exec();
 }
 
 void DisplayHandler::restartCOM()
@@ -93,6 +95,10 @@ void DisplayHandler::startCOM()
     }
     else {
         sendPacket(CMD_STARTUP, nullptr, 0);
+
+        if(settings.value("display_dark_mode").toBool()) {
+            on_settings_setDisplayDarkMode(true);
+        }
     }
 }
 
@@ -105,6 +111,7 @@ void DisplayHandler::stopCOM()
     }
 }
 
+//TODO: rewrite to use a command queue that is emptied in another thread to get rid of the ack workaround below
 void DisplayHandler::sendPacket(uint8_t cmd, uint8_t* data, uint8_t size)
 {
     //Make sure the MCU sent an ACK for the last packet before sending another one
@@ -122,11 +129,16 @@ void DisplayHandler::sendPacket(uint8_t cmd, uint8_t* data, uint8_t size)
         serial->write((char*)data, size);
     }
 
-    timer->start(200);
+    timer->start(ACK_TIMEOUT);
 }
 
 void DisplayHandler::checkPortAck()
 {
+    //Shitty workaround for two successive commands crashing the connection when the receiver is still working on the first command
+    while (timer->remainingTime() > ACK_TIMEOUT) {
+        loop.processEvents();
+    }
+
     timer->stop();
 
     bool acked = false;

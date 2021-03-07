@@ -3,19 +3,21 @@
 
 #include <QObject>
 #include <QSettings>
-#include <QErrorMessage>
 #include <QTimer>
 #include <QtSerialPort/QSerialPort>
 #include <cmath>
 
 #include "perfreader.h"
-#include "dialogoptions.h"
+
+#define ACK_TIMEOUT 400
 
 #define CMD_STARTUP 0x10
 #define CMD_SHUTDOWN 0x11
 #define CMD_DATA 0x20
 #define CMD_CFG 0x30
 #define CMD_ACK 0x99
+
+#define CFG_DARK_MODE 0x01
 
 enum class data_type_t {
     CPU_LOAD,
@@ -59,8 +61,8 @@ public:
     void shutdown();
 
 public slots:
-    void openSettingsDialog();
     void restartCOM();
+    void on_settings_setDisplayDarkMode(bool dark);
 
 private:
     void startCOM();
@@ -69,8 +71,8 @@ private:
 
     bool active = false;
     QSerialPort* serial = nullptr;
-    QErrorMessage* errorMsg;
     QTimer* timer;
+    QEventLoop loop;
 
 private slots:
     void checkPortAck();
