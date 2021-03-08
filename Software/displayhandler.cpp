@@ -15,7 +15,7 @@ DisplayHandler::DisplayHandler(QObject *parent) : QObject(parent)
     if(!active) { return; }
 
     timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &DisplayHandler::checkPortAck);
+    connect(timer, &QTimer::timeout, this, &DisplayHandler::on_timer_timeout);
 
     startCOM();
 }
@@ -46,6 +46,22 @@ void DisplayHandler::sendPerformanceData(cpu_info_t &cpuInfo, ram_info_t &ramInf
     sendPacket(CMD_DATA, (uint8_t*)data, sizeof(data));
 }
 
+void DisplayHandler::shutdown()
+{
+    if (active) {
+        stopCOM();
+    }
+}
+
+void DisplayHandler::restartCOM()
+{
+    if(!active) { return; }
+
+    stopCOM();
+    delete serial;
+    startCOM();
+}
+
 void DisplayHandler::on_settings_setDisplayDarkMode(bool dark)
 {
     if (!active || !isConnected()) { return; }
@@ -62,20 +78,6 @@ DisplayHandler::~DisplayHandler()
     }
 }
 
-void DisplayHandler::restartCOM()
-{
-    if(!active) { return; }
-
-    stopCOM();
-    delete serial;
-    startCOM();
-}
-
-void DisplayHandler::shutdown()
-{
-    stopCOM();
-}
-
 
 
 void DisplayHandler::startCOM()
@@ -85,7 +87,9 @@ void DisplayHandler::startCOM()
     quint32 baudrate = settings.value("baudrate", 115200).toUInt();
 
     serial = new QSerialPort(comPort, this);
+    connect(serial, &QSerialPort::readyRead, this, &DisplayHandler::on_serial_readyRead);
     serial->setBaudRate(baudrate);
+
     if (!serial->open(QIODevice::ReadWrite)) {
         QString msg = "An error occured while opening COM port!\n";
         msg += "Port: " + comPort + "\nBaudrate: " + QString::number(baudrate) + "\n";
@@ -103,24 +107,34 @@ void DisplayHandler::startCOM()
 
 void DisplayHandler::stopCOM()
 {
-    if (active && isConnected()) {
+    if (isConnected()) {
+        QEventLoop loop;
+        while (!cmdQueue.isEmpty() || awaitingAck) {
+            loop.processEvents();
+        }
+
         sendPacket(CMD_SHUTDOWN, nullptr, 0);
         serial->flush();
         serial->waitForBytesWritten();
     }
+
+    disconnect(serial, &QSerialPort::readyRead, this, &DisplayHandler::on_serial_readyRead);
 }
 
-//TODO: rewrite to use a command queue that is emptied in another thread to get rid of the ack workaround below
+void DisplayHandler::dispatchCommand(uint8_t cmd, uint8_t *data, uint8_t size)
+{
+    if (awaitingAck) {
+        cmd_t cmdT = { cmd, size, {0} };
+        if (size) { memcpy(cmdT.data, data, size); }
+        cmdQueue.enqueue(cmdT);
+    }
+    else {
+        sendPacket(cmd, data, size);
+    }
+}
+
 void DisplayHandler::sendPacket(uint8_t cmd, uint8_t* data, uint8_t size)
 {
-    //Make sure the MCU sent an ACK for the last packet before sending another one
-    if (timer->isActive()) {
-        checkPortAck();
-        if (!isConnected()) {
-            return;
-        }
-    }
-
     const uint8_t cmdPtr[2] = { cmd, size };
     serial->write((char*)cmdPtr, 2);
 
@@ -128,27 +142,30 @@ void DisplayHandler::sendPacket(uint8_t cmd, uint8_t* data, uint8_t size)
         serial->write((char*)data, size);
     }
 
+    awaitingAck = true;
     timer->start(ACK_TIMEOUT);
 }
 
-void DisplayHandler::checkPortAck()
+void DisplayHandler::on_serial_readyRead()
 {
-    //Shitty workaround for two successive commands crashing the connection when the receiver is still working on the first command
-    while (timer->remainingTime() > ACK_TIMEOUT / 2) {
-        loop.processEvents();
-    }
+    QByteArray data = serial->readAll();
+    if (((uint8_t)data.at(0)) == CMD_ACK) {
+        if (!awaitingAck) {
+            qWarning("Received erronous ACK!");
+        }
+        awaitingAck = false;
 
-    timer->stop();
-
-    bool acked = false;
-    if (serial->bytesAvailable() > 0) {
-        QByteArray data = serial->readAll();
-        if (((uint8_t)data.at(0)) == CMD_ACK) {
-            acked = true;
+        if (!cmdQueue.isEmpty()) {
+            cmd_t cmd = cmdQueue.dequeue();
+            sendPacket(cmd.cmd, cmd.data, cmd.length);
         }
     }
+}
 
-    if (!acked) {
+void DisplayHandler::on_timer_timeout()
+{
+    if (awaitingAck) {
+        qWarning("ACK timed out, closing connection!");
         serial->close();
     }
 }

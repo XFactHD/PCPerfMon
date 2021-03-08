@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QSettings>
 #include <QTimer>
+#include <QQueue>
 #include <QtSerialPort/QSerialPort>
 #include <cmath>
 
@@ -46,6 +47,12 @@ typedef struct {
 } data_point_t;
 #pragma pack(pop)
 
+typedef struct {
+    uint8_t cmd;
+    uint8_t length;
+    uint8_t data[255];
+} cmd_t;
+
 class DisplayHandler : public QObject
 {
     Q_OBJECT
@@ -67,15 +74,19 @@ public slots:
 private:
     void startCOM();
     void stopCOM();
+
+    void dispatchCommand(uint8_t cmd, uint8_t* data, uint8_t size);
     void sendPacket(uint8_t cmd, uint8_t* data, uint8_t size);
 
     bool active = false;
+    bool awaitingAck = false;
     QSerialPort* serial = nullptr;
+    QQueue<cmd_t> cmdQueue;
     QTimer* timer;
-    QEventLoop loop;
 
 private slots:
-    void checkPortAck();
+    void on_timer_timeout();
+    void on_serial_readyRead();
 };
 
 #endif // DISPLAYHANDLER_H
