@@ -29,6 +29,9 @@ void msgHandler(QtMsgType type, const QMessageLogContext &context, const QString
             break;
     }
 
+#ifdef INDEV
+    std::cout << text << std::flush;
+#endif
     logFile.write(text, strlen(text));
     logFile.flush();
 }
