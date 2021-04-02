@@ -49,7 +49,7 @@ void PerfReader::initialize()
 
     openQuery();
     initializeNetCounters();
-    gpu = new NvGPUHelper();
+    gpu = new NvMLReader();
     ohm = new OHMWrapper();
     ohm->init();
 }
@@ -143,8 +143,8 @@ gpu_info_t PerfReader::getGPUInfo()
     gpuInfo.gpuLoad = gpu->getGpuLoad();
     gpuInfo.gpuClock = gpu->getGpuClock();
 
-    uint32_t vramUsed = 0;
-    uint32_t vramTotal = 0;
+    uint64_t vramUsed = 0;
+    uint64_t vramTotal = 0;
     gpu->getVRamInfo(&vramUsed, &vramTotal);
     gpuInfo.vramUsed = vramUsed;
     gpuInfo.vramTotal = vramTotal;

@@ -11,7 +11,7 @@
 #include <pdh.h>
 #include <pdhmsg.h>
 
-#include "nvgpuhelper.h"
+#include "nvmlreader.h"
 #include "ohmwrapper.h"
 
 //#define DEBUG
@@ -131,7 +131,7 @@ private:
     QMutex mutex;
     QWaitCondition condition;
 
-    NvGPUHelper* gpu;
+    NvMLReader* gpu;
     OHMWrapper* ohm;
 };
 

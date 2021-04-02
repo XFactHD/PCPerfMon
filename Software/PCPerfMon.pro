@@ -20,7 +20,7 @@ SOURCES += \
     displayhandler.cpp \
     main.cpp \
     mainwindow.cpp \
-    nvgpuhelper.cpp \
+    nvmlreader.cpp \
     ohmwrapper.cpp \
     perfreader.cpp
 
@@ -28,7 +28,9 @@ HEADERS += \
     dialogoptions.h \
     displayhandler.h \
     mainwindow.h \
-    nvgpuhelper.h \
+    nvml.h \
+    nvmldefs.h \
+    nvmlreader.h \
     ohmwrapper.h \
     perfreader.h
 

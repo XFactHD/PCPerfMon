@@ -312,7 +312,7 @@ void MainWindow::on_perfdata_ready(cpu_info_t cpuInfo, ram_info_t ramInfo, net_i
     //Display GPU data
     ui->progressBar_gpuLoad->setValue(gpuInfo.gpuLoad);
     ui->progressBar_gpuVram->setValue(gpuInfo.vramLoad);
-    QString vramText = QString::number(gpuInfo.vramUsed / 1048576.0, 'f', 1) + "/" + QString::number(gpuInfo.vramTotal / 1048576.0, 'f', 1) + " GB (%p%)";
+    QString vramText = QString::number(gpuInfo.vramUsed / 1073741824.0, 'f', 1) + "/" + QString::number(gpuInfo.vramTotal / 1073741824.0, 'f', 1) + " GB (%p%)";
     ui->progressBar_gpuVram->setFormat(vramText);
     ui->plot_gpu->graph(0)->addData(timeStamp, gpuInfo.gpuLoad);
     ui->plot_gpu->graph(1)->addData(timeStamp, gpuInfo.vramLoad);
