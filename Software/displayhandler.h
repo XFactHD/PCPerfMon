@@ -60,8 +60,6 @@ public:
     explicit DisplayHandler(QObject *parent = nullptr);
     ~DisplayHandler();
 
-    void sendPerformanceData(cpu_info_t& cpuInfo, ram_info_t& ramInfo, net_info_t& netInfo, gpu_info_t& gpuInfo);
-
     bool isConnected() { return serial != nullptr && serial->isOpen(); }
     QString getComPort() { return serial != nullptr ? serial->portName() : "[Invalid]"; }
     qint32 getBaudrate() { return serial != nullptr ? serial->baudRate() : -1; }
@@ -69,6 +67,7 @@ public:
 
 public slots:
     void restartCOM();
+    void on_perfdata_ready(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo);
     void on_settings_setDisplayDarkMode(bool dark);
 
 private:

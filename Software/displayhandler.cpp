@@ -20,7 +20,7 @@ DisplayHandler::DisplayHandler(QObject *parent) : QObject(parent)
     startCOM();
 }
 
-void DisplayHandler::sendPerformanceData(cpu_info_t &cpuInfo, ram_info_t &ramInfo, net_info_t &netInfo, gpu_info_t &gpuInfo)
+void DisplayHandler::on_perfdata_ready(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo)
 {
     if (!active || !isConnected()) { return; }
 

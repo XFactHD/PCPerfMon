@@ -84,6 +84,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->statusBar->addPermanentWidget(serialStatus);
 
     display = new DisplayHandler(this);
+    connect(perf, &PerfReader::perfdataReady, display, &DisplayHandler::on_perfdata_ready);
 
     connect(ui->menuMain->actions().at(0), &QAction::triggered, this, &MainWindow::on_menu_open_settings);
     connect(ui->menuMain->actions().at(1), &QAction::triggered, display, &DisplayHandler::restartCOM);
@@ -333,8 +334,6 @@ void MainWindow::on_perfdata_ready(cpu_info_t cpuInfo, ram_info_t ramInfo, net_i
         if(ui->plot_net->isVisible()) { ui->plot_net->replot(); }
         if(ui->plot_gpu->isVisible()) { ui->plot_gpu->replot(); }
     }
-
-    display->sendPerformanceData(cpuInfo, ramInfo, netInfo, gpuInfo);
 
     const char* connected = display->isConnected() ? "Connected" : "Disconnected";
     QString text = QString("Serial: %1 | Port: %2 | Baudrate: %3").arg(connected, 12).arg(display->getComPort(), 5).arg(display->getBaudrate(), 10);
