@@ -77,7 +77,9 @@ private:
 
     QFont monoFont;
     QPalette lightPalette;
+    QPalette lightProgressBarPalette;
     QPalette darkPalette;
+    QPalette darkProgressBarPalette;
     bool darkMode;
 
     PerfReader* perf;

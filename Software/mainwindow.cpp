@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
     QCoreApplication::setOrganizationName("dc");
     QCoreApplication::setApplicationName("PCPerfMon");
 
-    //Configure dark mode palette
+    //Configure color palettes
     darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
     darkPalette.setColor(QPalette::WindowText, Qt::white);
     darkPalette.setColor(QPalette::Base, QColor(25, 25, 25));
@@ -49,14 +49,23 @@ MainWindow::MainWindow(QWidget *parent)
     darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
     darkPalette.setColor(QPalette::HighlightedText, Qt::black);
 
+    darkProgressBarPalette = QPalette(darkPalette);
+    darkProgressBarPalette.setColor(QPalette::Highlight, QColor(0, 210, 0));
+
+    lightProgressBarPalette.setColor(QPalette::Highlight, QColor(0, 210, 0));
+    lightProgressBarPalette.setColor(QPalette::HighlightedText, Qt::black);
+
+    //Set configured app style
     darkMode = QSettings().value("app_dark_mode").toBool();
     configureAppStyle(darkMode);
 
+    //Create charts
     createCPUChart();
     createRAMChart();
     createNetChart();
     createGPUChart();
 
+    //Configure mouse event transparency
     ui->label_cpu->setAttribute(Qt::WA_TransparentForMouseEvents);
     ui->progressBar_cpu->setAttribute(Qt::WA_TransparentForMouseEvents);
     ui->label_ram->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -70,11 +79,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->progressBar_gpuLoad->setAttribute(Qt::WA_TransparentForMouseEvents);
     ui->progressBar_gpuVram->setAttribute(Qt::WA_TransparentForMouseEvents);
 
+    //Add custom meta types
     qRegisterMetaType<cpu_info_t>("cpu_info_t");
     qRegisterMetaType<ram_info_t>("ram_info_t");
     qRegisterMetaType<net_info_t>("net_info_t");
     qRegisterMetaType<gpu_info_t>("gpu_info_t");
 
+    //Start components and connect signals
     perf = new PerfReader(this);
     perf->start();
     connect(perf, &PerfReader::perfdataReady, this, &MainWindow::on_perfdata_ready);
@@ -107,6 +118,13 @@ void MainWindow::configureAppStyle(bool dark)
         setPlotColors(ui->plot_ram, darkBg, Qt::white);
         setPlotColors(ui->plot_net, darkBg, Qt::white);
         setPlotColors(ui->plot_gpu, darkBg, Qt::white);
+
+        ui->progressBar_cpu->setPalette(darkProgressBarPalette);
+        ui->progressBar_ram->setPalette(darkProgressBarPalette);
+        ui->progressBar_netIn->setPalette(darkProgressBarPalette);
+        ui->progressBar_netOut->setPalette(darkProgressBarPalette);
+        ui->progressBar_gpuLoad->setPalette(darkProgressBarPalette);
+        ui->progressBar_gpuVram->setPalette(darkProgressBarPalette);
     }
     else {
         setPalette(lightPalette);
@@ -117,6 +135,13 @@ void MainWindow::configureAppStyle(bool dark)
         setPlotColors(ui->plot_ram, Qt::white, Qt::black);
         setPlotColors(ui->plot_net, Qt::white, Qt::black);
         setPlotColors(ui->plot_gpu, Qt::white, Qt::black);
+
+        ui->progressBar_cpu->setPalette(lightProgressBarPalette);
+        ui->progressBar_ram->setPalette(lightProgressBarPalette);
+        ui->progressBar_netIn->setPalette(lightProgressBarPalette);
+        ui->progressBar_netOut->setPalette(lightProgressBarPalette);
+        ui->progressBar_gpuLoad->setPalette(lightProgressBarPalette);
+        ui->progressBar_gpuVram->setPalette(lightProgressBarPalette);
     }
 }
 
