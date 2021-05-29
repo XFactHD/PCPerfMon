@@ -6,7 +6,7 @@ OHMWrapper::OHMWrapper(QObject* parent) : QObject(parent)
     //ohm->setProgram("ohm_reader.exe");
     ohm->setProgram("java");
     ohm->setArguments({"Main"});
-    connect(ohm, &QProcess::readyReadStandardError, this, &OHMWrapper::on_stderr_readyRead);
+    connect(ohm, &QProcess::readyReadStandardError, this, &OHMWrapper::stderrReadyRead);
 
     ohm->start(QIODevice::ReadWrite | QIODevice::Unbuffered);
     ready = ohm->waitForStarted();
@@ -73,7 +73,7 @@ void OHMWrapper::shutdown()
 
 
 
-void OHMWrapper::on_stderr_readyRead()
+void OHMWrapper::stderrReadyRead()
 {
     qWarning("%s", ohm->readAllStandardError().toStdString().c_str());
 }

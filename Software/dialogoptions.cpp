@@ -33,7 +33,7 @@ DialogOptions::~DialogOptions()
     delete ui;
 }
 
-void DialogOptions::on_DialogOptions_finished(int result)
+void DialogOptions::optionsClosed(int result)
 {
     if(result == 1) {
         QSettings settings;

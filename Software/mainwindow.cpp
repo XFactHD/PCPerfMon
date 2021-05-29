@@ -21,12 +21,12 @@ MainWindow::MainWindow(QWidget *parent)
     //Setup sys tray icon
     sysTrayIcon = new QSystemTrayIcon(windowIcon(), this);
     sysTrayIcon->setToolTip("PCPerfMon");
-    connect(sysTrayIcon, &QSystemTrayIcon::activated, this, &MainWindow::on_sysTrayIcon_activated);
+    connect(sysTrayIcon, &QSystemTrayIcon::activated, this, &MainWindow::sysTrayIconActivated);
     sysTrayIcon->show();
 
     //Setup sys tray menu
     sysTrayMenu = new QMenu(this);
-    sysTrayMenu->addAction("Show", this, SLOT(on_sysTrayMenu_show()));
+    sysTrayMenu->addAction("Show", this, SLOT(showSysTrayMenu()));
     sysTrayMenu->addAction("Exit", this, SLOT(close()));
     sysTrayIcon->setContextMenu(sysTrayMenu);
 
@@ -88,21 +88,21 @@ MainWindow::MainWindow(QWidget *parent)
     //Start components and connect signals
     perf = new PerfReader(this);
     perf->start();
-    connect(perf, &PerfReader::perfdataReady, this, &MainWindow::on_perfdata_ready);
+    connect(perf, &PerfReader::perfdataReady, this, &MainWindow::perfdataReady);
 
     serialStatus = new QLabel("Serial: Disconnected - Port: [Invalid] - Baudrate: -1", this);
     serialStatus->setContentsMargins(0, 0, 10, 0);
     ui->statusBar->addPermanentWidget(serialStatus);
 
     display = new DisplayHandler(this);
-    connect(perf, &PerfReader::perfdataReady, display, &DisplayHandler::on_perfdata_ready);
+    connect(perf, &PerfReader::perfdataReady, display, &DisplayHandler::perfdataReady);
 
-    connect(ui->menuMain->actions().at(0), &QAction::triggered, this, &MainWindow::on_menu_open_settings);
+    connect(ui->menuMain->actions().at(0), &QAction::triggered, this, &MainWindow::menuOpenSettings);
     connect(ui->menuMain->actions().at(1), &QAction::triggered, display, &DisplayHandler::restartCOM);
     connect(ui->menuMain->actions().at(2), &QAction::triggered, this, &QCoreApplication::quit);
 
     timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &MainWindow::on_timer_timeout);
+    connect(timer, &QTimer::timeout, this, &MainWindow::timerTimedOut);
     timer->start(1000);
 }
 
@@ -287,12 +287,12 @@ void MainWindow::createGPUChart()
     ui->plot_gpu->setVisible(false);
 }
 
-void MainWindow::on_timer_timeout()
+void MainWindow::timerTimedOut()
 {
     perf->queryNewData();
 }
 
-void MainWindow::on_perfdata_ready(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo)
+void MainWindow::perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo)
 {
     //The first data point must not be displayed
     static bool first = true;
@@ -434,24 +434,24 @@ void MainWindow::on_pushButton_gpu_clicked()
     ui->plot_gpu->replot();
 }
 
-void MainWindow::on_menu_open_settings()
+void MainWindow::menuOpenSettings()
 {
     DialogOptions options((QWidget*)parent());
     options.setPalette(darkMode ? darkPalette : lightPalette);
 
-    connect(&options, &DialogOptions::setAppDarkMode, this, &MainWindow::on_settings_setAppDarkMode);
-    connect(&options, &DialogOptions::setDisplayDarkMode, display, &DisplayHandler::on_settings_setDisplayDarkMode);
+    connect(&options, &DialogOptions::setAppDarkMode, this, &MainWindow::setAppDarkMode);
+    connect(&options, &DialogOptions::setDisplayDarkMode, display, &DisplayHandler::setDisplayDarkMode);
 
     options.exec();
 }
 
-void MainWindow::on_settings_setAppDarkMode(bool dark)
+void MainWindow::setAppDarkMode(bool dark)
 {
     darkMode = dark;
     configureAppStyle(dark);
 }
 
-void MainWindow::on_app_aboutToQuit()
+void MainWindow::aboutToQuit()
 {
     display->shutdown();
     perf->requestShutdown();
@@ -490,7 +490,7 @@ double MainWindow::findHighest(QSharedPointer<QCPGraphDataContainer> data1, QSha
     return max;
 }
 
-void MainWindow::on_sysTrayIcon_activated(QSystemTrayIcon::ActivationReason reason)
+void MainWindow::sysTrayIconActivated(QSystemTrayIcon::ActivationReason reason)
 {
     if(reason == QSystemTrayIcon::Trigger) {
         emit sysTrayIcon->activated(QSystemTrayIcon::Context);
@@ -510,7 +510,7 @@ void MainWindow::on_sysTrayIcon_activated(QSystemTrayIcon::ActivationReason reas
     }
 }
 
-void MainWindow::on_sysTrayMenu_show()
+void MainWindow::showSysTrayMenu()
 {
     if(isHidden()) {
         showNormal();

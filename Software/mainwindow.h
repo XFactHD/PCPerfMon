@@ -34,16 +34,16 @@ public:
     ~MainWindow();
 
 public slots:
-    void on_settings_setAppDarkMode(bool dark);
+    void setAppDarkMode(bool dark);
 
-    void on_app_aboutToQuit();
+    void aboutToQuit();
 
-    void on_sysTrayMenu_show();
+    void showSysTrayMenu();
 
 private slots:
-    void on_timer_timeout();
+    void timerTimedOut();
 
-    void on_perfdata_ready(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo);
+    void perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo);
 
     void on_pushButton_cpu_clicked();
 
@@ -53,9 +53,9 @@ private slots:
 
     void on_pushButton_gpu_clicked();
 
-    void on_menu_open_settings();
+    void menuOpenSettings();
 
-    void on_sysTrayIcon_activated(QSystemTrayIcon::ActivationReason reason);
+    void sysTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
 
 protected:
     virtual void changeEvent(QEvent* event);

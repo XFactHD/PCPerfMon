@@ -22,7 +22,7 @@ public:
     uint32_t getCpuPkgPower();
 
 private slots:
-    void on_stderr_readyRead();
+    void stderrReadyRead();
 
 private:
     QProcess* ohm;

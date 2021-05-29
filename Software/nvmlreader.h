@@ -27,6 +27,7 @@ public:
 private:
     bool checkAndPrintError(nvmlReturn_t ret, const char* func);
 
+    HMODULE dllHandle = NULL;
     bool ready = false;
     nvmlDevice_t device = NULL;
 

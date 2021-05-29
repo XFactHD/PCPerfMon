@@ -4,21 +4,21 @@ NvMLReader::NvMLReader(QObject* parent) : QObject(parent)
 {
     //Get nvml.dll from NVSMI folder
     const char* dllName = "nvml.dll"; //The nvsmi path (C:/Program Files/NVIDIA Corporation/NVSMI) must be on the system PATH
-    HMODULE hmod = LoadLibraryA(dllName);
-    if (hmod == NULL) { qCritical() << "Couldn't find nvml.dll"; return; }
+    dllHandle = LoadLibraryA(dllName);
+    if (dllHandle == NULL) { qCritical() << "Couldn't find nvml.dll"; return; }
 
     //Retrieve function pointers
-    nvmlInit =                      (nvmlInit_t)                        GetProcAddress(hmod, "nvmlInit_v2");
-    nvmlShutdown =                  (nvmlShutdown_t)                    GetProcAddress(hmod, "nvmlShutdown");
-    nvmlErrorString =               (nvmlErrorString_t)                 GetProcAddress(hmod, "nvmlErrorString");
-    nvmlDeviceGetCount =            (nvmlDeviceGetCount_t)              GetProcAddress(hmod, "nvmlDeviceGetCount_v2");
-    nvmlDeviceGetHandleByIndex =    (nvmlDeviceGetHandleByIndex_t)      GetProcAddress(hmod, "nvmlDeviceGetHandleByIndex");
-    nvmlDeviceGetName =             (nvmlDeviceGetName_t)               GetProcAddress(hmod, "nvmlDeviceGetName");
-    nvmlDeviceGetClockInfo =        (nvmlDeviceGetClockInfo_t)          GetProcAddress(hmod, "nvmlDeviceGetClockInfo");
-    nvmlDeviceGetTemperature =      (nvmlDeviceGetTemperature_t)        GetProcAddress(hmod, "nvmlDeviceGetTemperature");
-    nvmlDeviceGetPowerUsage =       (nvmlDeviceGetPowerUsage_t)         GetProcAddress(hmod, "nvmlDeviceGetPowerUsage");
-    nvmlDeviceGetMemoryInfo =       (nvmlDeviceGetMemoryInfo_t)         GetProcAddress(hmod, "nvmlDeviceGetMemoryInfo");
-    nvmlDeviceGetUtilizationRates = (nvmlDeviceGetUtilizationRates_t)   GetProcAddress(hmod, "nvmlDeviceGetUtilizationRates");
+    nvmlInit =                      (nvmlInit_t)                        GetProcAddress(dllHandle, "nvmlInit_v2");
+    nvmlShutdown =                  (nvmlShutdown_t)                    GetProcAddress(dllHandle, "nvmlShutdown");
+    nvmlErrorString =               (nvmlErrorString_t)                 GetProcAddress(dllHandle, "nvmlErrorString");
+    nvmlDeviceGetCount =            (nvmlDeviceGetCount_t)              GetProcAddress(dllHandle, "nvmlDeviceGetCount_v2");
+    nvmlDeviceGetHandleByIndex =    (nvmlDeviceGetHandleByIndex_t)      GetProcAddress(dllHandle, "nvmlDeviceGetHandleByIndex");
+    nvmlDeviceGetName =             (nvmlDeviceGetName_t)               GetProcAddress(dllHandle, "nvmlDeviceGetName");
+    nvmlDeviceGetClockInfo =        (nvmlDeviceGetClockInfo_t)          GetProcAddress(dllHandle, "nvmlDeviceGetClockInfo");
+    nvmlDeviceGetTemperature =      (nvmlDeviceGetTemperature_t)        GetProcAddress(dllHandle, "nvmlDeviceGetTemperature");
+    nvmlDeviceGetPowerUsage =       (nvmlDeviceGetPowerUsage_t)         GetProcAddress(dllHandle, "nvmlDeviceGetPowerUsage");
+    nvmlDeviceGetMemoryInfo =       (nvmlDeviceGetMemoryInfo_t)         GetProcAddress(dllHandle, "nvmlDeviceGetMemoryInfo");
+    nvmlDeviceGetUtilizationRates = (nvmlDeviceGetUtilizationRates_t)   GetProcAddress(dllHandle, "nvmlDeviceGetUtilizationRates");
 
     //Validate function pointers
     if (nvmlInit == NULL ||
@@ -62,7 +62,7 @@ NvMLReader::NvMLReader(QObject* parent) : QObject(parent)
     char buffer[NVML_DEVICE_NAME_BUFFER_SIZE];
     ret = nvmlDeviceGetName(device, buffer, NVML_DEVICE_NAME_BUFFER_SIZE);
     if (!checkAndPrintError(ret, "nvmlDeviceGetName")) {
-        qInfo() << "Found NVIDIA GPU with name: " << buffer;
+        qInfo().nospace() << "Found NVIDIA GPU with name: " << buffer;
     }
 
     //Ready
@@ -76,6 +76,10 @@ void NvMLReader::shutdown()
         ready = false;
         nvmlReturn_t ret = nvmlShutdown();
         checkAndPrintError(ret, "nvmlShutdown");
+    }
+
+    if (dllHandle != NULL) {
+        FreeLibrary(dllHandle);
     }
 }
 

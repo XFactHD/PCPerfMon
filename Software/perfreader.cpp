@@ -173,7 +173,16 @@ void PerfReader::initializeNetCounters()
     size_t instanceCount = 0;
 
     enumObjectItems(objectName, NULL, NULL, &instanceList, &instanceCount);
-    if(instanceList == NULL || instanceCount == 0) { return; }
+    if(instanceList == NULL || instanceCount == 0) {
+        if (instanceList != NULL) { deleteList(&instanceList, instanceCount); }
+
+        delete[] objectName;
+        delete[] bwCounterName;
+        delete[] inCounterName;
+        delete[] outCounterName;
+
+        return;
+    }
 
     PWSTR path = new wchar_t[2048];
 
@@ -187,6 +196,11 @@ void PerfReader::initializeNetCounters()
     addCounter(path, &netOutCounter);
 
     deleteList(&instanceList, instanceCount);
+    delete[] objectName;
+    delete[] bwCounterName;
+    delete[] inCounterName;
+    delete[] outCounterName;
+    delete[] path;
 }
 
 
@@ -238,6 +252,7 @@ void PerfReader::getCounterLocalizationTable()
 
     if(status != ERROR_SUCCESS) {
         PRINT_DEBUG("Querying HKEY_PERFORMANCE_TEXT failed with 0x" << std::hex << status << ".");
+        delete[] data;
         return;
     }
     PRINT_DEBUG("Localization data retrieved.");
@@ -245,6 +260,7 @@ void PerfReader::getCounterLocalizationTable()
     size_t entryCount = passedSize == 0 ? 0 : std::count(data, data + passedSize - 1, '\0');
     if(entryCount == 0) {
         PRINT_DEBUG("Querying HKEY_PERFORMANCE_TEXT returned no entries.");
+        delete[] data;
         return;
     }
 
@@ -269,6 +285,7 @@ void PerfReader::getCounterLocalizationTable()
         i++;
     }
     PRINT_DEBUG("Localization entries parsed.");
+    delete[] data;
 }
 
 size_t PerfReader::localizeCounter(PWSTR counterEn, PWSTR* counterLoc)
@@ -288,14 +305,20 @@ size_t PerfReader::localizeCounter(PWSTR counterEn, PWSTR* counterLoc)
             LPWSTR name = new WCHAR[bufSize];
             PDH_STATUS status = PdhLookupPerfNameByIndexW(NULL, idx, name, &bufSize);
             if(status == ERROR_SUCCESS) {
-                if(bufSize == 0 || wcslen(name) == 0) { break; } //If the result is empty, the key is not localized
+                if(bufSize == 0 || wcslen(name) == 0) { //If the result is empty, the key is not localized
+                    delete[] name;
+                    break;
+                }
 
                 size_t len = wcslen(name);
                 *counterLoc = new WCHAR[len + 1];
                 wcscpy_s(*counterLoc, len + 1, name);
+                delete[] name;
+
                 WPRINT_DEBUG(L"Localization for \"" << counterEn << L"\" returned \"" << name << L"\".");
                 return len;
             }
+            delete[] name;
         }
     }
 
@@ -346,6 +369,8 @@ PDH_STATUS PerfReader::enumObjectItems(PWSTR object, PWSTR** counterList, size_t
     pwsCounterListBuffer = (LPWSTR)malloc(dwCounterListSize * sizeof(WCHAR));
     pwsInstanceListBuffer = (LPWSTR)malloc(dwInstanceListSize * sizeof(WCHAR));
     if(pwsCounterListBuffer == NULL || pwsInstanceListBuffer == NULL) {
+        if (pwsCounterListBuffer != NULL) { free(pwsCounterListBuffer); }
+        if (pwsInstanceListBuffer != NULL) { free(pwsInstanceListBuffer); }
 
         WPRINT_DEBUG(L"Unable to allocate buffers.");
         return status;
@@ -365,6 +390,9 @@ PDH_STATUS PerfReader::enumObjectItems(PWSTR object, PWSTR** counterList, size_t
     WPRINT_DEBUG(L"Counter and instance names requested.");
 
     if (status != ERROR_SUCCESS) {
+        free(pwsCounterListBuffer);
+        free(pwsInstanceListBuffer);
+
         WPRINT_DEBUG(L"Second PdhEnumObjectItems failed with 0x" << std::hex << status << ".");
         return status;
     }
@@ -422,7 +450,7 @@ void PerfReader::deleteList(PWSTR** list, size_t listSize)
         for(size_t i = 0; i < listSize; i++) {
             delete (*list)[i];
         }
-        delete *list;
+        delete[] *list;
     }
 }
 

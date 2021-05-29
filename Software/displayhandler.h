@@ -67,8 +67,8 @@ public:
 
 public slots:
     void restartCOM();
-    void on_perfdata_ready(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo);
-    void on_settings_setDisplayDarkMode(bool dark);
+    void perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo);
+    void setDisplayDarkMode(bool dark);
 
 private:
     void startCOM();
@@ -84,8 +84,8 @@ private:
     QTimer* timer;
 
 private slots:
-    void on_timer_timeout();
-    void on_serial_readyRead();
+    void timerTimedOut();
+    void serialReadyRead();
 };
 
 #endif // DISPLAYHANDLER_H

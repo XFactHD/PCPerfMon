@@ -15,12 +15,12 @@ DisplayHandler::DisplayHandler(QObject *parent) : QObject(parent)
     if(!active) { return; }
 
     timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &DisplayHandler::on_timer_timeout);
+    connect(timer, &QTimer::timeout, this, &DisplayHandler::timerTimedOut);
 
     startCOM();
 }
 
-void DisplayHandler::on_perfdata_ready(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo)
+void DisplayHandler::perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo)
 {
     if (!active || !isConnected()) { return; }
 
@@ -62,7 +62,7 @@ void DisplayHandler::restartCOM()
     startCOM();
 }
 
-void DisplayHandler::on_settings_setDisplayDarkMode(bool dark)
+void DisplayHandler::setDisplayDarkMode(bool dark)
 {
     if (!active || !isConnected()) { return; }
 
@@ -87,20 +87,17 @@ void DisplayHandler::startCOM()
     quint32 baudrate = settings.value("baudrate", 115200).toUInt();
 
     serial = new QSerialPort(comPort, this);
-    connect(serial, &QSerialPort::readyRead, this, &DisplayHandler::on_serial_readyRead);
+    connect(serial, &QSerialPort::readyRead, this, &DisplayHandler::serialReadyRead);
     serial->setBaudRate(baudrate);
 
     if (!serial->open(QIODevice::ReadWrite)) {
-        QString msg = "An error occured while opening COM port!\n";
-        msg += "Port: " + comPort + "\nBaudrate: " + QString::number(baudrate) + "\n";
-        msg += "Error code: " + QString::number(serial->error());
-        qWarning("%s", msg.toStdString().c_str());
+        qWarning().nospace() << "An error occured while opening COM port!" << " [Port: " << comPort << ", Baudrate: " << baudrate << ", Error: " << serial->error() << "]";
     }
     else {
         sendPacket(CMD_STARTUP, nullptr, 0);
 
         if(settings.value("display_dark_mode").toBool()) {
-            on_settings_setDisplayDarkMode(true);
+            setDisplayDarkMode(true);
         }
     }
 }
@@ -118,7 +115,7 @@ void DisplayHandler::stopCOM()
         serial->waitForBytesWritten();
     }
 
-    disconnect(serial, &QSerialPort::readyRead, this, &DisplayHandler::on_serial_readyRead);
+    disconnect(serial, &QSerialPort::readyRead, this, &DisplayHandler::serialReadyRead);
 }
 
 void DisplayHandler::dispatchCommand(uint8_t cmd, uint8_t *data, uint8_t size)
@@ -146,7 +143,7 @@ void DisplayHandler::sendPacket(uint8_t cmd, uint8_t* data, uint8_t size)
     timer->start(ACK_TIMEOUT);
 }
 
-void DisplayHandler::on_serial_readyRead()
+void DisplayHandler::serialReadyRead()
 {
     QByteArray data = serial->readAll();
     if (((uint8_t)data.at(0)) == CMD_ACK) {
@@ -162,7 +159,7 @@ void DisplayHandler::on_serial_readyRead()
     }
 }
 
-void DisplayHandler::on_timer_timeout()
+void DisplayHandler::timerTimedOut()
 {
     if (awaitingAck) {
         qWarning("ACK timed out, closing connection!");
