@@ -25,7 +25,7 @@ signals:
     void setDisplayDarkMode(bool dark);
 
 private slots:
-    void optionsClosed(int result);
+    void on_DialogOptions_finished(int result);
 
     void on_lineEdit_com_port_textEdited(const QString &arg1);
 
