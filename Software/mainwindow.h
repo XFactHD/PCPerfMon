@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
+#include <QLocalServer>
+#include <QLocalSocket>
 
 #include <iostream>
 
@@ -57,6 +59,8 @@ private slots:
 
     void sysTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
 
+    void newIPCConnection();
+
 protected:
     virtual void changeEvent(QEvent* event);
 
@@ -72,6 +76,7 @@ private:
     double findHighest(QSharedPointer<QCPGraphDataContainer> data1, QSharedPointer<QCPGraphDataContainer> data2, int backCount);
 
     Ui::MainWindow *ui;
+    QLocalServer server;
     QSystemTrayIcon* sysTrayIcon;
     QMenu* sysTrayMenu;
 

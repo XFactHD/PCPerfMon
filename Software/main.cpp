@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 
 #include <QApplication>
+#include <QLocalSocket>
 
 QFile logFile;
 
@@ -37,12 +38,20 @@ void msgHandler(QtMsgType type, const QMessageLogContext &context, const QString
 
 int main(int argc, char *argv[])
 {
-    //Try to create mutex
-    HANDLE hMutexHandle = CreateMutex(NULL, TRUE, L"pcperfmon.singleinstance");
-    if (GetLastError() == ERROR_ALREADY_EXISTS) {
-        std::cout << "Only one instance is allowed!" << std::endl;
-        CloseHandle(hMutexHandle);
+    QLocalSocket socket;
+    socket.connectToServer("pcperfmon");
+    if (socket.waitForConnected()) {
+        socket.write("show");
+        socket.waitForBytesWritten();
+        socket.disconnectFromServer();
         return 1;
+    }
+    else {
+        //ServerNotFoundError means no other instance is running
+        if (socket.error() != QLocalSocket::ServerNotFoundError) {
+            std::cout << socket.errorString().toStdString() << std::endl;
+            return 2;
+        }
     }
 
     //Redirect console output to file
@@ -65,11 +74,5 @@ int main(int argc, char *argv[])
     app.connect(&app, &QApplication::aboutToQuit, &w, &MainWindow::aboutToQuit);
 
     //Start application
-    int retVal = app.exec();
-
-    //Destroy mutex
-    ReleaseMutex(hMutexHandle);
-    CloseHandle(hMutexHandle);
-
-    return retVal;
+    return app.exec();
 }

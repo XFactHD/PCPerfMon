@@ -11,6 +11,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->setupUi(this);
 
+    connect(&server, &QLocalServer::newConnection, this, &MainWindow::newIPCConnection);
+    server.listen("pcperfmon");
+
     //Disable window resizing and maximizing
     setWindowFlag(Qt::MSWindowsFixedSizeDialogHint, true);
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
@@ -458,6 +461,20 @@ void MainWindow::aboutToQuit()
     while(!perf->isFinished());
 }
 
+void MainWindow::newIPCConnection() {
+    QLocalSocket* sock = server.nextPendingConnection();
+
+    sock->waitForReadyRead();
+
+    QString msg = sock->readAll();
+    if (msg.compare("show") == 0) {
+        showSysTrayMenu();
+    }
+
+    sock->close();
+    delete sock;
+}
+
 QString MainWindow::formatScientific(double value, int precision, QVector<QString> unit)
 {
     int unitIdx = 0;
@@ -528,8 +545,8 @@ void MainWindow::showSysTrayMenu()
 void MainWindow::changeEvent(QEvent* event)
 {
     QMainWindow::changeEvent(event);
-    if(event->type() == QEvent::WindowStateChange) {
-        if(isMinimized()) {
+    if (event->type() == QEvent::WindowStateChange) {
+        if (isMinimized()) {
             QTimer::singleShot(0, this, SLOT(hide()));
         }
     }
