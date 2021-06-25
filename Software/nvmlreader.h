@@ -14,7 +14,9 @@ class NvMLReader : public QObject
 {
     Q_OBJECT
 public:
-    explicit NvMLReader(QObject *parent = nullptr);
+    explicit NvMLReader(QObject *parent = nullptr) : QObject(parent) {}
+
+    void init();
 
     uint32_t getGpuLoad();
     uint16_t getGpuClock();

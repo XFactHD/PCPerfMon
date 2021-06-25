@@ -66,6 +66,7 @@ public:
     ~PerfReader();
 
     void run();
+    void startAndWaitUntilReady();
     void requestShutdown();
 
     void initialize();

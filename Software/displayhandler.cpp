@@ -1,6 +1,6 @@
 #include "displayhandler.h"
 
-DisplayHandler::DisplayHandler(QObject *parent) : QObject(parent)
+void DisplayHandler::init()
 {
     QSettings settings;
     if (!settings.contains("com_port")) {
@@ -14,8 +14,7 @@ DisplayHandler::DisplayHandler(QObject *parent) : QObject(parent)
 
     if(!active) { return; }
 
-    timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &DisplayHandler::timerTimedOut);
+    connect(&timer, &QTimer::timeout, this, &DisplayHandler::timerTimedOut);
 
     startCOM();
 }
@@ -58,7 +57,6 @@ void DisplayHandler::restartCOM()
     if(!active) { return; }
 
     stopCOM();
-    delete serial;
     startCOM();
 }
 
@@ -70,14 +68,6 @@ void DisplayHandler::setDisplayDarkMode(bool dark)
     sendPacket(CMD_CFG, data, 2);
 }
 
-DisplayHandler::~DisplayHandler()
-{
-    if(active) {
-        delete serial;
-        delete timer;
-    }
-}
-
 
 
 void DisplayHandler::startCOM()
@@ -86,12 +76,13 @@ void DisplayHandler::startCOM()
     QString comPort = settings.value("com_port", "COM1").toString();
     quint32 baudrate = settings.value("baudrate", 115200).toUInt();
 
-    serial = new QSerialPort(comPort, this);
-    connect(serial, &QSerialPort::readyRead, this, &DisplayHandler::serialReadyRead);
-    serial->setBaudRate(baudrate);
+    serial.setParent(this);
+    serial.setPortName(comPort);
+    connect(&serial, &QSerialPort::readyRead, this, &DisplayHandler::serialReadyRead);
+    serial.setBaudRate(baudrate);
 
-    if (!serial->open(QIODevice::ReadWrite)) {
-        qWarning().nospace() << "An error occured while opening COM port!" << " [Port: " << comPort << ", Baudrate: " << baudrate << ", Error: " << serial->error() << "]";
+    if (!serial.open(QIODevice::ReadWrite)) {
+        qWarning().nospace() << "An error occured while opening COM port!" << " [Port: " << comPort << ", Baudrate: " << baudrate << ", Error: " << serial.error() << "]";
     }
     else {
         sendPacket(CMD_STARTUP, nullptr, 0);
@@ -111,11 +102,12 @@ void DisplayHandler::stopCOM()
         }
 
         sendPacket(CMD_SHUTDOWN, nullptr, 0);
-        serial->flush();
-        serial->waitForBytesWritten();
+        serial.flush();
+        serial.waitForBytesWritten();
+        serial.close();
     }
 
-    disconnect(serial, &QSerialPort::readyRead, this, &DisplayHandler::serialReadyRead);
+    disconnect(&serial, &QSerialPort::readyRead, this, &DisplayHandler::serialReadyRead);
 }
 
 void DisplayHandler::dispatchCommand(uint8_t cmd, uint8_t *data, uint8_t size)
@@ -133,19 +125,19 @@ void DisplayHandler::dispatchCommand(uint8_t cmd, uint8_t *data, uint8_t size)
 void DisplayHandler::sendPacket(uint8_t cmd, uint8_t* data, uint8_t size)
 {
     const uint8_t cmdPtr[2] = { cmd, size };
-    serial->write((char*)cmdPtr, 2);
+    serial.write((char*)cmdPtr, 2);
 
     if (data != nullptr && size > 0) {
-        serial->write((char*)data, size);
+        serial.write((char*)data, size);
     }
 
     awaitingAck = true;
-    timer->start(ACK_TIMEOUT);
+    timer.start(ACK_TIMEOUT);
 }
 
 void DisplayHandler::serialReadyRead()
 {
-    QByteArray data = serial->readAll();
+    QByteArray data = serial.readAll();
     if (((uint8_t)data.at(0)) == CMD_ACK) {
         if (!awaitingAck) {
             qWarning("Received erronous ACK!");
@@ -163,6 +155,6 @@ void DisplayHandler::timerTimedOut()
 {
     if (awaitingAck) {
         qWarning("ACK timed out, closing connection!");
-        serial->close();
+        serial.close();
     }
 }

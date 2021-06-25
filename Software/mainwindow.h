@@ -12,6 +12,7 @@
 #include "perfreader.h"
 #include "displayhandler.h"
 #include "dialogoptions.h"
+#include "widgetstartup.h"
 
 //#define DEBUG
 
@@ -32,7 +33,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(bool startInTray, QWidget *parent = nullptr);
     ~MainWindow();
 
 public slots:
@@ -72,12 +73,13 @@ private:
     void createNetChart();
     void createGPUChart();
 
+    void showSerialStatus();
     QString formatScientific(double value, int precision, QVector<QString> unit);
     double findHighest(QSharedPointer<QCPGraphDataContainer> data1, QSharedPointer<QCPGraphDataContainer> data2, int backCount);
 
     Ui::MainWindow *ui;
     QLocalServer server;
-    QSystemTrayIcon* sysTrayIcon;
+    QSystemTrayIcon sysTrayIcon;
     QMenu* sysTrayMenu;
 
     QFont monoFont;
@@ -87,10 +89,10 @@ private:
     QPalette darkProgressBarPalette;
     bool darkMode;
 
-    PerfReader* perf;
-    QTimer* timer;
-    DisplayHandler* display;
-    QLabel* serialStatus;
+    PerfReader perf;
+    QTimer timer;
+    DisplayHandler display;
+    QLabel serialStatus;
 };
 
 class NetTicker : public QCPAxisTicker

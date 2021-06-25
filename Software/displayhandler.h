@@ -57,12 +57,12 @@ class DisplayHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit DisplayHandler(QObject *parent = nullptr);
-    ~DisplayHandler();
+    explicit DisplayHandler(QObject *parent = nullptr) : QObject(parent), timer(this) {}
 
-    bool isConnected() { return serial != nullptr && serial->isOpen(); }
-    QString getComPort() { return serial != nullptr ? serial->portName() : "[Invalid]"; }
-    qint32 getBaudrate() { return serial != nullptr ? serial->baudRate() : -1; }
+    void init();
+    bool isConnected() { return serial.isOpen(); }
+    QString getComPort() { return serial.portName(); }
+    qint32 getBaudrate() { return serial.baudRate(); }
     void shutdown();
 
 public slots:
@@ -79,9 +79,9 @@ private:
 
     bool active = false;
     bool awaitingAck = false;
-    QSerialPort* serial = nullptr;
+    QSerialPort serial;
     QQueue<cmd_t> cmdQueue;
-    QTimer* timer;
+    QTimer timer;
 
 private slots:
     void timerTimedOut();

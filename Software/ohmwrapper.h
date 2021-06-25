@@ -9,10 +9,9 @@ class OHMWrapper : public QObject
 {
     Q_OBJECT
 public:
-    explicit OHMWrapper(QObject* parent = nullptr);
-    virtual ~OHMWrapper() { delete ohm; }
+    explicit OHMWrapper(QObject* parent = nullptr) : QObject(parent) {}
 
-    void init() {}
+    void init();
     void shutdown();
 
     void update() {}

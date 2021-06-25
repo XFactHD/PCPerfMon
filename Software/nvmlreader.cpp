@@ -1,6 +1,6 @@
 #include "nvmlreader.h"
 
-NvMLReader::NvMLReader(QObject* parent) : QObject(parent)
+void NvMLReader::init()
 {
     //Get nvml.dll from NVSMI folder
     const char* dllName = "nvml.dll"; //The nvsmi path (C:/Program Files/NVIDIA Corporation/NVSMI) must be on the system PATH

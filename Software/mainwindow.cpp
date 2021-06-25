@@ -1,41 +1,51 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(bool startInTray, QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(new Ui::MainWindow), sysTrayIcon(this), perf(this), timer(this), display(this), serialStatus(this)
 {
+    WidgetStartup* startup = new WidgetStartup(startInTray);
+
     monoFont = QFont("Monospaced");
     monoFont.setStyleHint(QFont::Monospace);
     setFont(monoFont);
+    startup->pushProgress(5);
 
     ui->setupUi(this);
+    startup->pushProgress(6);
 
     connect(&server, &QLocalServer::newConnection, this, &MainWindow::newIPCConnection);
     server.listen("pcperfmon");
+    startup->pushProgress(6);
 
     //Disable window resizing and maximizing
     setWindowFlag(Qt::MSWindowsFixedSizeDialogHint, true);
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+    startup->pushProgress(5);
 
     //Set window icon
     setWindowIcon(QIcon("icon.ico"));
+    startup->pushProgress(5);
 
     //Setup sys tray icon
-    sysTrayIcon = new QSystemTrayIcon(windowIcon(), this);
-    sysTrayIcon->setToolTip("PCPerfMon");
-    connect(sysTrayIcon, &QSystemTrayIcon::activated, this, &MainWindow::sysTrayIconActivated);
-    sysTrayIcon->show();
+    sysTrayIcon.setIcon(windowIcon());
+    sysTrayIcon.setToolTip("PCPerfMon");
+    connect(&sysTrayIcon, &QSystemTrayIcon::activated, this, &MainWindow::sysTrayIconActivated);
+    sysTrayIcon.show();
+    startup->pushProgress(6);
 
     //Setup sys tray menu
     sysTrayMenu = new QMenu(this);
     sysTrayMenu->addAction("Show", this, SLOT(showSysTrayMenu()));
     sysTrayMenu->addAction("Exit", this, SLOT(close()));
-    sysTrayIcon->setContextMenu(sysTrayMenu);
+    sysTrayIcon.setContextMenu(sysTrayMenu);
+    startup->pushProgress(6);
 
     //Configure application details
     QCoreApplication::setOrganizationName("dc");
     QCoreApplication::setApplicationName("PCPerfMon");
+    startup->pushProgress(5);
 
     //Configure color palettes
     darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
@@ -57,16 +67,19 @@ MainWindow::MainWindow(QWidget *parent)
 
     lightProgressBarPalette.setColor(QPalette::Highlight, QColor(0, 210, 0));
     lightProgressBarPalette.setColor(QPalette::HighlightedText, Qt::black);
+    startup->pushProgress(6);
 
     //Set configured app style
     darkMode = QSettings().value("app_dark_mode").toBool();
     configureAppStyle(darkMode);
+    startup->pushProgress(6);
 
     //Create charts
     createCPUChart();
     createRAMChart();
     createNetChart();
     createGPUChart();
+    startup->pushProgress(6);
 
     //Configure mouse event transparency
     ui->label_cpu->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -81,32 +94,39 @@ MainWindow::MainWindow(QWidget *parent)
     ui->label_gpu->setAttribute(Qt::WA_TransparentForMouseEvents);
     ui->progressBar_gpuLoad->setAttribute(Qt::WA_TransparentForMouseEvents);
     ui->progressBar_gpuVram->setAttribute(Qt::WA_TransparentForMouseEvents);
+    startup->pushProgress(5);
 
     //Add custom meta types
     qRegisterMetaType<cpu_info_t>("cpu_info_t");
     qRegisterMetaType<ram_info_t>("ram_info_t");
     qRegisterMetaType<net_info_t>("net_info_t");
     qRegisterMetaType<gpu_info_t>("gpu_info_t");
+    startup->pushProgress(5);
 
     //Start components and connect signals
-    perf = new PerfReader(this);
-    perf->start();
-    connect(perf, &PerfReader::perfdataReady, this, &MainWindow::perfdataReady);
+    perf.startAndWaitUntilReady();
+    connect(&perf, &PerfReader::perfdataReady, this, &MainWindow::perfdataReady);
+    startup->pushProgress(6);
 
-    serialStatus = new QLabel("Serial: Disconnected - Port: [Invalid] - Baudrate: -1", this);
-    serialStatus->setContentsMargins(0, 0, 10, 0);
-    ui->statusBar->addPermanentWidget(serialStatus);
+    serialStatus.setText("Serial: Disconnected - Port: [Invalid] - Baudrate: -1");
+    serialStatus.setContentsMargins(0, 0, 10, 0);
+    ui->statusBar->addPermanentWidget(&serialStatus);
+    startup->pushProgress(6);
 
-    display = new DisplayHandler(this);
-    connect(perf, &PerfReader::perfdataReady, display, &DisplayHandler::perfdataReady);
+    display.init();
+    connect(&perf, &PerfReader::perfdataReady, &display, &DisplayHandler::perfdataReady);
+    showSerialStatus();
+    startup->pushProgress(6);
 
     connect(ui->menuMain->actions().at(0), &QAction::triggered, this, &MainWindow::menuOpenSettings);
-    connect(ui->menuMain->actions().at(1), &QAction::triggered, display, &DisplayHandler::restartCOM);
+    connect(ui->menuMain->actions().at(1), &QAction::triggered, &display, &DisplayHandler::restartCOM);
     connect(ui->menuMain->actions().at(2), &QAction::triggered, this, &QCoreApplication::quit);
+    startup->pushProgress(5);
 
-    timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &MainWindow::timerTimedOut);
-    timer->start(1000);
+    connect(&timer, &QTimer::timeout, this, &MainWindow::timerTimedOut);
+    timer.start(1000);
+    startup->pushProgress(5);
+    startup->deleteLater();
 }
 
 void MainWindow::configureAppStyle(bool dark)
@@ -292,7 +312,7 @@ void MainWindow::createGPUChart()
 
 void MainWindow::timerTimedOut()
 {
-    perf->queryNewData();
+    perf.queryNewData();
 }
 
 void MainWindow::perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo)
@@ -363,15 +383,21 @@ void MainWindow::perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_
         if(ui->plot_gpu->isVisible()) { ui->plot_gpu->replot(); }
     }
 
-    const char* connected = display->isConnected() ? "Connected" : "Disconnected";
-    QString text = QString("Serial: %1 | Port: %2 | Baudrate: %3").arg(connected, 12).arg(display->getComPort(), 5).arg(display->getBaudrate(), 10);
-    serialStatus->setText(text);
+    showSerialStatus();
 
     idx++;
 }
 
+void MainWindow::showSerialStatus()
+{
+    const char* connected = display.isConnected() ? "Connected" : "Disconnected";
+    QString text = QString("Serial: %1 | Port: %2 | Baudrate: %3").arg(connected, 12).arg(display.getComPort(), 5).arg(display.getBaudrate(), 10);
+    serialStatus.setText(text);
+}
+
 MainWindow::~MainWindow()
 {
+    delete sysTrayMenu;
     delete ui;
 }
 
@@ -443,7 +469,7 @@ void MainWindow::menuOpenSettings()
     options.setPalette(darkMode ? darkPalette : lightPalette);
 
     connect(&options, &DialogOptions::setAppDarkMode, this, &MainWindow::setAppDarkMode);
-    connect(&options, &DialogOptions::setDisplayDarkMode, display, &DisplayHandler::setDisplayDarkMode);
+    connect(&options, &DialogOptions::setDisplayDarkMode, &display, &DisplayHandler::setDisplayDarkMode);
 
     options.exec();
 }
@@ -456,9 +482,9 @@ void MainWindow::setAppDarkMode(bool dark)
 
 void MainWindow::aboutToQuit()
 {
-    display->shutdown();
-    perf->requestShutdown();
-    while(!perf->isFinished());
+    display.shutdown();
+    perf.requestShutdown();
+    while(!perf.isFinished());
 }
 
 void MainWindow::newIPCConnection() {
@@ -510,7 +536,7 @@ double MainWindow::findHighest(QSharedPointer<QCPGraphDataContainer> data1, QSha
 void MainWindow::sysTrayIconActivated(QSystemTrayIcon::ActivationReason reason)
 {
     if(reason == QSystemTrayIcon::Trigger) {
-        emit sysTrayIcon->activated(QSystemTrayIcon::Context);
+        emit sysTrayIcon.activated(QSystemTrayIcon::Context);
     }
     else if(reason == QSystemTrayIcon::DoubleClick) {
         if(isHidden()) {

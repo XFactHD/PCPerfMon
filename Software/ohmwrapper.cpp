@@ -1,6 +1,6 @@
 #include "ohmwrapper.h"
 
-OHMWrapper::OHMWrapper(QObject* parent) : QObject(parent)
+void OHMWrapper::init()
 {
     ohm = new QProcess();
     //ohm->setProgram("ohm_reader.exe");
@@ -68,6 +68,7 @@ void OHMWrapper::shutdown()
         ohm->write("shutdown\n");
         ohm->closeWriteChannel();
         ohm->waitForFinished(1000);
+        delete ohm;
     }
 }
 

@@ -19,6 +19,10 @@ void PerfReader::run()
 {
     initialize();
 
+    mutex.lock();
+    condition.wakeOne();
+    mutex.unlock();
+
     while (running) {
         mutex.lock();
         condition.wait(&mutex);
@@ -50,8 +54,18 @@ void PerfReader::initialize()
     openQuery();
     initializeNetCounters();
     gpu = new NvMLReader();
+    gpu->init();
     ohm = new OHMWrapper();
     ohm->init();
+}
+
+void PerfReader::startAndWaitUntilReady()
+{
+    start();
+
+    mutex.lock();
+    condition.wait(&mutex);
+    mutex.unlock();
 }
 
 void PerfReader::requestShutdown()

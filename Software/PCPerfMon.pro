@@ -26,7 +26,8 @@ SOURCES += \
     mainwindow.cpp \
     nvmlreader.cpp \
     ohmwrapper.cpp \
-    perfreader.cpp
+    perfreader.cpp \
+    widgetstartup.cpp
 
 HEADERS += \
     dialogoptions.h \
@@ -36,11 +37,13 @@ HEADERS += \
     nvmldefs.h \
     nvmlreader.h \
     ohmwrapper.h \
-    perfreader.h
+    perfreader.h \
+    widgetstartup.h
 
 FORMS += \
     dialogoptions.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    widgetstartup.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

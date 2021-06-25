@@ -36,7 +36,7 @@ void msgHandler(QtMsgType type, const QMessageLogContext &context, const QString
     logFile.flush();
 }
 
-int main(int argc, char *argv[])
+int checkSingleInstance()
 {
     QLocalSocket socket;
     socket.connectToServer("pcperfmon");
@@ -53,6 +53,13 @@ int main(int argc, char *argv[])
             return 2;
         }
     }
+    return 0;
+}
+
+int main(int argc, char *argv[])
+{
+    int notSingle = checkSingleInstance();
+    if (notSingle) { return notSingle; }
 
     //Redirect console output to file
     logFile.setFileName(QDir::homePath() + "/pcperfmon_log.txt");
@@ -63,8 +70,9 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     app.setStyle(QStyleFactory::create("Fusion"));
 
-    MainWindow w;
-    if(app.arguments().contains("--startInTray")) {
+    bool startInTray = app.arguments().contains("--startInTray");
+    MainWindow w(startInTray);
+    if(startInTray) {
         w.showMinimized();
     }
     else {
