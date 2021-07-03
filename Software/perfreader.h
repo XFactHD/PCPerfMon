@@ -50,7 +50,7 @@ typedef struct gpu_info {
     uint64_t vramUsed;  //in Bytes
     int vramLoad;       //in %
     uint32_t gpuTemp;   //in °C
-    uint32_t gpuPower;  //in W
+    uint32_t gpuPower;  //in mW
 } gpu_info_t;
 
 Q_DECLARE_METATYPE(cpu_info);

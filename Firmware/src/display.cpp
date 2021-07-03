@@ -267,7 +267,7 @@ void printData(uint8_t* data, uint8_t length) {
                     break;
                 }
                 case data_type_t::GPU_VRAM_TOTAL: {
-                    float value = dataPoint.data / 1048576.0F;
+                    float value = dataPoint.data / 1073741824.0F;
                     if (value >= 0.0F && value <= 999.9F) {
                         display.setCursor(268, 135);
                         display.printf("%5.1fGB", value);
@@ -275,7 +275,7 @@ void printData(uint8_t* data, uint8_t length) {
                     break;
                 }
                 case data_type_t::GPU_VRAM_USED: {
-                    float value = dataPoint.data / 1048576.0F;
+                    float value = dataPoint.data / 1073741824.0F;
                     if (value >= 0.0F && value <= 999.9F) {
                         display.setCursor(268, 160);
                         display.printf("%5.1fGB", value);
@@ -283,9 +283,9 @@ void printData(uint8_t* data, uint8_t length) {
                     break;
                 }
                 case data_type_t::GPU_POWER: {
-                    if (dataPoint.data >= 0 && dataPoint.data <= 9999) {
+                    if (dataPoint.data >= 0 && dataPoint.data <= 999999) {
                         display.setCursor(280, 185);
-                        display.printf("%4dW", dataPoint.data);
+                        display.printf("%4dW", dataPoint.data / 1000);
                     }
                     break;
                 }
