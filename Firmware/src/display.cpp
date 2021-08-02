@@ -4,7 +4,8 @@
 uint8_t dataPins[16] = { 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
 ST7789 display = ST7789(TFT_RST, TFT_RD, TFT_WR, TFT_CS, TFT_DC, dataPins, TFT_BL);
 #elif defined(__SAMD21G18A__) || defined(__SAMD51__)
-ST7789 display = ST7789(TFT_RST, TFT_RD, TFT_WR, TFT_CS, TFT_DC, &PORT->Group[PORTA], 6, true, TFT_BL);
+ST7789 display = ST7789(TFT_RST, TFT_RD, TFT_WR, TFT_CS, TFT_DC, &PORT->Group[PORTA], 6, false, TFT_BL); //Initial PCB design
+//ST7789 display = ST7789(TFT_RST, TFT_RD, TFT_WR, TFT_CS, TFT_DC, &PORT->Group[PORTA], 4, true, TFT_BL); //New PCB design
 #endif
 
 const char* netUnits[] = { "KBit/s", "MBit/s", "GBit/s" };
