@@ -1,8 +1,8 @@
 #include "ST7789_16bit.hpp"
 
 #if defined(__SAMD21G18A__) || defined(__SAMD51__)
-ST7789::ST7789(uint8_t nReset, uint8_t nRead, uint8_t nWrite, uint8_t nCS, uint8_t dc, PortGroup* dataBus, uint8_t dataOffset, uint8_t brightness)
-: Adafruit_GFX(TFT_WIDTH, TFT_HEIGHT), ledCtrl(brightness), dataOffset(dataOffset) {
+ST7789::ST7789(uint8_t nReset, uint8_t nRead, uint8_t nWrite, uint8_t nCS, uint8_t dc, PortGroup* dataBus, uint8_t dataOffset, bool dataMirrored, uint8_t brightness)
+: Adafruit_GFX(TFT_WIDTH, TFT_HEIGHT), ledCtrl(brightness), dataOffset(dataOffset), dataMirrored(dataMirrored) {
   this->nReset = nReset;
   this->nRead = nRead;
   this->nWrite = nWrite;
@@ -493,16 +493,15 @@ __unused uint32_t ST7789::readID() {
 /*** Low level bus I/O ***/
 void ST7789::writeToBus(uint16_t data) {
 #if defined(__SAMD21G18A__) || defined(__SAMD51__)
+    if (dataMirrored) {
+        data = __builtin_arm_rbit(data) >> 16;
+    }
+
     WR_LOW();
-#ifdef TEST_GRAND_CENTRAL
-    PORT->Group[PORTB].OUTSET.reg = (uint8_t)data;                  //For test only! (Adafruit Metro Grand Central)
-    PORT->Group[PORTB].OUTCLR.reg = (uint8_t)(data ^ 0xFF);         //Pinout (D0 to D15): D12 D13 D9 A2 A7 A8 A9 A10 A3 A4 A5 A6 D48 D49 D46 D47
-    PORT->Group[PORTC].OUTSET.reg = (uint8_t)(data >> 8);
-    PORT->Group[PORTC].OUTCLR.reg = (uint8_t)((data >> 8) ^ 0xFF);
-#else
+
     *regDataSet = (data << dataOffset) & maskData;
     *regDataReset = ((data ^ 0xFFFFu) << dataOffset) & maskData;
-#endif
+
     WR_HIGH();
 #elif defined(__IMXRT1062__)
     WR_LOW();

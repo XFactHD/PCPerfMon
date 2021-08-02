@@ -72,16 +72,17 @@ class ST7789 : public Adafruit_GFX {
   public:
     #if defined(__SAMD21G18A__) || defined(__SAMD51__)
     /**
-     * @param nReset      LCD reset pin, when ununsed, set to 255
-     * @param nRead       LCD read pin, when unused, set to 255
-     * @param nWrite      LCD write pin
-     * @param nCS         LCD chip select pin
-     * @param dc          LCD data/command pin
-     * @param dataBus     LCD data pins, pass in the port the data bus is connected to
-     * @param dataOffset  Offset of LCD D0 in relation to Port I/O 0
-     * @param brightness  LCD backlight controller dim/mosfet gate pin, when unused, set to 255
+     * @param nReset       LCD reset pin, when ununsed, set to 255
+     * @param nRead        LCD read pin, when unused, set to 255
+     * @param nWrite       LCD write pin
+     * @param nCS          LCD chip select pin
+     * @param dc           LCD data/command pin
+     * @param dataBus      LCD data pins, pass in the port the data bus is connected to
+     * @param dataOffset   Offset of LCD D0 (unmirrored) or LCD D15 (mirrored) in relation to Port I/O 0
+     * @param dataMirrored Wether the LCD data bus is flipped in relation to the MCU port
+     * @param brightness   LCD backlight controller dim/mosfet gate pin, when unused, set to 255
      */
-    ST7789(uint8_t nReset, uint8_t nRead, uint8_t nWrite, uint8_t nCS, uint8_t dc, PortGroup* dataBus, uint8_t dataOffset, uint8_t brightness = 255);
+    ST7789(uint8_t nReset, uint8_t nRead, uint8_t nWrite, uint8_t nCS, uint8_t dc, PortGroup* dataBus, uint8_t dataOffset, bool dataMirrored, uint8_t brightness = 255);
     #elif defined(__IMXRT1062__)
     /**
      * @param nReset      LCD reset pin, when ununsed, set to 255
@@ -153,6 +154,7 @@ class ST7789 : public Adafruit_GFX {
 #if defined(__SAMD21G18A__) || defined(__SAMD51__)
     PortGroup* dataBus;
     uint8_t dataOffset;
+    bool dataMirrored;
 #elif defined(__IMXRT1062__)
     uint8_t dataBus[16] = {};
 #endif
@@ -179,7 +181,7 @@ class ST7789 : public Adafruit_GFX {
     volatile uint32_t* regDataReset = nullptr;
     volatile uint32_t* regDataRead = nullptr;
     uint32_t maskData = 0;
-  #endif
+#endif
 };
 /*
 class ST7789_Buffered : public ST7789 {
