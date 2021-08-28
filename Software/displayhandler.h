@@ -20,7 +20,7 @@
 
 #define CFG_DARK_MODE 0x01
 
-enum class data_type_t {
+enum class data_type_t : uint8_t {
     CPU_LOAD,
     CPU_CLOCK,
     CPU_TEMP,

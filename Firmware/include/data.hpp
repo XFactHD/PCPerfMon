@@ -5,7 +5,7 @@
 
 #include "display.hpp"
 
-enum class data_type_t {
+enum class data_type_t : uint8_t {
     CPU_LOAD,
     CPU_CLOCK,
     CPU_TEMP,
@@ -27,7 +27,7 @@ enum class data_type_t {
 };
 
 inline data_type_t& operator++(data_type_t& type) {
-    return type = static_cast<data_type_t>(std::underlying_type<data_type_t>::type(type) + 1);
+    return type = static_cast<data_type_t>(static_cast<uint8_t>(type) + 1);
 }
 
 typedef struct __attribute__((packed)) {
