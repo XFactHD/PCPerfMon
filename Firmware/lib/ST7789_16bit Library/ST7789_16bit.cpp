@@ -494,7 +494,7 @@ __unused uint32_t ST7789::readID() {
 void ST7789::writeToBus(uint16_t data) {
 #if defined(__SAMD21G18A__) || defined(__SAMD51__)
     if (dataMirrored) {
-        data = __builtin_arm_rbit(data) >> 16;
+        data = __RBIT(data) >> 16;
     }
 
     WR_LOW();
