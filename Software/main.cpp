@@ -9,23 +9,24 @@ void msgHandler(QtMsgType type, const QMessageLogContext &context, const QString
 {
     (void)context;
     QByteArray localMsg = msg.toLocal8Bit();
+    QByteArray time = QTime::currentTime().toString("hh:mm:ss.zzz").toLocal8Bit();
 
     char text[1024];
     switch (type) {
         case QtDebugMsg:
-            sprintf_s(text, "Debug: %s\n", localMsg.constData());
+            sprintf_s(text, "[%s][Debug]: %s\n", time.constData(), localMsg.constData());
             break;
         case QtInfoMsg:
-            sprintf_s(text, "Info: %s\n", localMsg.constData());
+            sprintf_s(text, "[%s][Info]: %s\n", time.constData(), localMsg.constData());
             break;
         case QtWarningMsg:
-            sprintf_s(text, "Warning: %s\n", localMsg.constData());
+            sprintf_s(text, "[%s][Warning]: %s\n", time.constData(), localMsg.constData());
             break;
         case QtCriticalMsg:
-            sprintf_s(text, "Critical: %s\n", localMsg.constData());
+            sprintf_s(text, "[%s][Critical]: %s\n", time.constData(), localMsg.constData());
             break;
         case QtFatalMsg:
-            sprintf_s(text, "Fatal: %s\n", localMsg.constData());
+            sprintf_s(text, "[%s][Fatal]: %s\n", time.constData(), localMsg.constData());
             break;
     }
 
