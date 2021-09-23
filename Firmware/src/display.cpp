@@ -4,8 +4,11 @@
 uint8_t dataPins[16] = { 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
 ST7789 display = ST7789(TFT_RST, TFT_RD, TFT_WR, TFT_CS, TFT_DC, dataPins, TFT_BL);
 #elif defined(__SAMD21G18A__) || defined(__SAMD51__)
+#ifdef PCB_V1
 ST7789 display = ST7789(TFT_RST, TFT_RD, TFT_WR, TFT_CS, TFT_DC, &PORT->Group[PORTA], 6, false, TFT_BL); //Initial PCB design
-//ST7789 display = ST7789(TFT_RST, TFT_RD, TFT_WR, TFT_CS, TFT_DC, &PORT->Group[PORTA], 4, true, TFT_BL); //New PCB design
+#else
+ST7789 display = ST7789(TFT_RST, TFT_RD, TFT_WR, TFT_CS, TFT_DC, &PORT->Group[PORTA], 4, true, TFT_BL); //New PCB design
+#endif
 #endif
 
 const char* netUnits[] = { "KBit/s", "MBit/s", "GBit/s" };
@@ -18,7 +21,11 @@ uint16_t colorBackground = 0;
 
 void initDisplay() {
     display.begin(false);
+#ifdef PCB_V1
+    display.setRotation(1);
+#else
     display.setRotation(3);
+#endif
 
     configureColors();
     drawBackground();
@@ -313,10 +320,12 @@ void printScientific(double value, double divider, int len, int decimals, const 
 
 void enableDisplay() {
     display.setDisplayOn(true);
+    display.setBrightness(brightness);
 }
 
 void disableDisplay() {
     display.setDisplayOn(false);
+    display.setBrightness(0);
 }
 
 void switchDarkMode(bool on) {
