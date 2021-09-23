@@ -1,9 +1,19 @@
 #include <Arduino.h>
 
+#if defined(__SAMD21G18A__) || defined(__SAMD51__)
+#include <avr/dtostrf.h> //Necessary to format floating point numbers with printf()
+#endif
+
 #include "display.hpp"
 #include "cmd.hpp"
 
 void setup() {
+#if defined(__SAMD21G18A__) || defined(__SAMD51__)
+    //Force linking
+    char buf1[10];
+    dtostrf(0.0, 6, 1, buf1);
+#endif
+
     initDisplay();
 
     Serial.begin(1000000);
