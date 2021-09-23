@@ -46,5 +46,6 @@ void printScientific(double value, double divider, int len, int decimals, const 
 void enableDisplay();
 void disableDisplay();
 void switchDarkMode(bool on);
+void setBrightness(uint8_t percent);
 
 #endif //DISPLAY_HPP

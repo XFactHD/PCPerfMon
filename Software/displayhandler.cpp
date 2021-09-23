@@ -68,6 +68,13 @@ void DisplayHandler::setDisplayDarkMode(bool dark)
     sendPacket(CMD_CFG, data, 2);
 }
 
+void DisplayHandler::setDisplayBrightness(uint8_t percent) {
+    if (!active || !isConnected()) { return; }
+
+    uint8_t data[] = { CFG_BRIGHTNESS, percent };
+    sendPacket(CMD_CFG, data, 2);
+}
+
 
 
 void DisplayHandler::startCOM()

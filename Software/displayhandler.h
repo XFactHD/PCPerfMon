@@ -10,7 +10,7 @@
 
 #include "perfreader.h"
 
-#define ACK_TIMEOUT 400
+#define ACK_TIMEOUT 500
 
 #define CMD_STARTUP 0x10
 #define CMD_SHUTDOWN 0x11
@@ -19,6 +19,7 @@
 #define CMD_ACK 0x99
 
 #define CFG_DARK_MODE 0x01
+#define CFG_BRIGHTNESS 0x02
 
 enum class data_type_t : uint8_t {
     CPU_LOAD,
@@ -69,6 +70,7 @@ public slots:
     void restartCOM();
     void perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo);
     void setDisplayDarkMode(bool dark);
+    void setDisplayBrightness(uint8_t percent);
 
 private:
     void startCOM();

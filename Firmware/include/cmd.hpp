@@ -12,6 +12,7 @@
 #define CMD_ACK 0x99
 
 #define CFG_DARK_MODE 0x01
+#define CFG_BRIGHTNESS 0x02
 
 void handleConfig(const uint8_t* data, uint8_t length);
 

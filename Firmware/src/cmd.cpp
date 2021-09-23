@@ -9,5 +9,12 @@ void handleConfig(const uint8_t* data, uint8_t length) {
             }
             break;
         }
+        case CFG_BRIGHTNESS: {
+            if (length == 2) {
+                setBrightness(data[1]);
+            }
+            break;
+        }
+        default: break;
     }
 }
