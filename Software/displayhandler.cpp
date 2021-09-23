@@ -85,6 +85,7 @@ void DisplayHandler::startCOM()
         qWarning().nospace() << "An error occured while opening COM port!" << " [Port: " << comPort << ", Baudrate: " << baudrate << ", Error: " << serial.error() << "]";
     }
     else {
+        serial.setDataTerminalReady(true); //Necessary to make the Adafruit Feather M0+ correctly detect a working connection
         sendPacket(CMD_STARTUP, nullptr, 0);
 
         if(settings.value("display_dark_mode").toBool()) {
@@ -154,7 +155,9 @@ void DisplayHandler::serialReadyRead()
 void DisplayHandler::timerTimedOut()
 {
     if (awaitingAck) {
+        awaitingAck = false;
         qWarning("ACK timed out, closing connection!");
         serial.close();
+        timer.stop();
     }
 }
