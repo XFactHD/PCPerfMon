@@ -14,7 +14,7 @@ ST7789 display = ST7789(TFT_RST, TFT_RD, TFT_WR, TFT_CS, TFT_DC, &PORT->Group[PO
 const char* netUnits[] = { "KBit/s", "MBit/s", "GBit/s" };
 
 bool darkMode = false;
-uint32_t brightness = 0xFFFFFFFF;
+uint8_t brightness = 255;
 uint16_t colorLine = 0;
 uint16_t colorHeader = 0;
 uint16_t colorText = 0;
@@ -338,5 +338,5 @@ void switchDarkMode(bool on) {
 
 void setBrightness(uint8_t percent) {
     auto factor = (float)percent;
-    brightness = (uint32_t)(factor * ((float) 0xFFFFFFFF));
+    brightness = (uint32_t)(factor * 255.0);
 }

@@ -26,6 +26,9 @@ ST7789::ST7789(uint8_t nReset, uint8_t nRead, uint8_t nWrite, uint8_t nCS, uint8
 
 void ST7789::begin(bool dispOn) {
     initGPIO();
+    if (ledCtrl != 255) {
+        pinMode(ledCtrl, OUTPUT);
+    }
     setBrightness(0); //Start up pwm timer if applicable
 
     _ystart = _xstart = 0;
@@ -596,7 +599,7 @@ inline void ST7789::WR_LOW() {
 #endif
 }
 
-void ST7789::setBrightness(uint32_t value) const {
+void ST7789::setBrightness(uint8_t value) const {
   if(ledCtrl != 255) {
     analogWrite(ledCtrl, value);
   }

@@ -116,7 +116,7 @@ public:
     void setRotation(uint8_t rotation) override;
     static uint16_t color565(uint8_t r, uint8_t g, uint8_t b) { return ((r & 0xF8u) << 8u) | ((g & 0xFCu) << 3u) | (b >> 3u); }
 
-    void setBrightness(uint32_t value) const;
+    void setBrightness(uint8_t value) const;
     void setDisplayOn(bool on);
 
     __unused uint32_t readID(); //FIXME: makes the display unresponsive and makes it display garbage
