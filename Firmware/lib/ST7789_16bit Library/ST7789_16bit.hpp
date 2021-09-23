@@ -69,7 +69,7 @@
 #define TFT_FOREGROUND 1
 
 class ST7789 : public Adafruit_GFX {
-  public:
+public:
     #if defined(__SAMD21G18A__) || defined(__SAMD51__)
     /**
      * @param nReset       LCD reset pin, when ununsed, set to 255
@@ -108,6 +108,11 @@ class ST7789 : public Adafruit_GFX {
 	void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color) override;
 	virtual void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], int16_t w, int16_t h);
 
+    void startWrite() override;
+    void endWrite() override;
+    void writePixel(int16_t x, int16_t y, uint16_t color) override;
+    void writeFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) override;
+
     void setRotation(uint8_t rotation) override;
     static uint16_t color565(uint8_t r, uint8_t g, uint8_t b) { return ((r & 0xF8u) << 8u) | ((g & 0xFCu) << 3u) | (b >> 3u); }
 
@@ -116,7 +121,7 @@ class ST7789 : public Adafruit_GFX {
 
     __unused uint32_t readID(); //FIXME: makes the display unresponsive and makes it display garbage
   
-  protected:
+protected:
     void initGPIO();
 
     void setAddressWindow(uint16_t xStart, uint16_t xEnd, uint16_t yStart, uint16_t yEnd);
@@ -183,49 +188,5 @@ class ST7789 : public Adafruit_GFX {
     uint32_t maskData = 0;
 #endif
 };
-/*
-class ST7789_Buffered : public ST7789 {
-  public:
-    ST7789_Buffered(uint8_t nReset, uint8_t nRead, uint8_t nWrite, uint8_t nCS, uint8_t dc, PortGroup* dataBus, uint8_t brightness = 255);
-    ~ST7789_Buffered();
 
-    void drawPixel(int16_t x, int16_t y, uint16_t color);
-    void fillScreen(uint16_t color);
-    void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-    void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
-    void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
-    void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], int16_t w, int16_t h);
-
-    void show();
-  
-  private:
-    uint16_t* buffer;
-};
-
-class ST7789_BufferedOverlay : public ST7789 {
-  public:
-    ST7789_BufferedOverlay(uint8_t nReset, uint8_t nRead, uint8_t nWrite, uint8_t nCS, uint8_t dc, PortGroup* dataBus, uint8_t brightness = 255);
-    ~ST7789_BufferedOverlay();
-
-    void drawPixel(int16_t x, int16_t y, uint16_t color);
-    void fillScreen(uint16_t color);
-    void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-    void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
-    void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
-    void drawRGBBitmap(int16_t x, int16_t y, const uint16_t bitmap[], int16_t w, int16_t h);
-
-    void setPlane(uint8_t p) { plane = p; }
-    void setShowForeground(bool active) { fgActive = active; }
-
-    void show();
-
-    uint16_t color4543(uint8_t r, uint8_t g, uint8_t b, uint8_t a) { return ((r & 0xF0) << 8) | ((g & 0xF8) << 4) | ((b & 0xF0) >> 1) | (a >> 5); }
-
-  private:
-    uint16_t** buffers;
-
-    bool fgActive;
-    uint8_t plane;
-};
-*/
 #endif

@@ -35,9 +35,9 @@ void initDisplay() {
 
 void configureColors() {
     if (darkMode) {
-        colorLine = TFT_WHITE;
+        colorLine = TFT_LIGHTGREY;
         colorHeader = TFT_NAVY;
-        colorText = TFT_WHITE;
+        colorText = TFT_LIGHTGREY;
         colorBackground = TFT_BLACK;
     }
     else {
@@ -120,12 +120,12 @@ void printLabels() {
             }
             case data_type_t::NET_IN: {
                 display.setCursor(170, 45);
-                display.print("Net In:");
+                display.print("Download:");
                 break;
             }
             case data_type_t::NET_OUT: {
                 display.setCursor(170, 70);
-                display.print("Net Out:");
+                display.print("Upload:");
                 break;
             }
             case data_type_t::GPU_LOAD: {
@@ -228,9 +228,6 @@ void printData(uint8_t* data, uint8_t length) {
                     }
                     break;
                 }
-                case data_type_t::NET_BANDWIDTH: {
-                    break;
-                }
                 case data_type_t::NET_IN: {
                     if (dataPoint.data >= 0 && dataPoint.data <= 999999999) {
                         display.setCursor(170, 55);
@@ -298,7 +295,7 @@ void printData(uint8_t* data, uint8_t length) {
                     }
                     break;
                 }
-                case data_type_t::DATA_TYPE_END: break;
+                default: break;
             }
         }
 

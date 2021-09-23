@@ -31,16 +31,15 @@ void DisplayHandler::perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_i
     data[4] =  { data_type_t::RAM_LOAD, (uint64_t)ramInfo.ramLoad };
     data[5] =  { data_type_t::RAM_TOTAL, ramInfo.ramTotal };
     data[6] =  { data_type_t::RAM_USED, ramInfo.ramUsed };
-    data[7] =  { data_type_t::NET_BANDWIDTH, (uint64_t)(netInfo.bandwidth * 100.0) };
-    data[8] =  { data_type_t::NET_IN, (uint64_t)(netInfo.netIn * 100.0) };
-    data[9] =  { data_type_t::NET_OUT, (uint64_t)(netInfo.netOut * 100.0) };
-    data[10] = { data_type_t::GPU_LOAD, (uint64_t)gpuInfo.gpuLoad };
-    data[11] = { data_type_t::GPU_CLOCK, gpuInfo.gpuClock };
-    data[12] = { data_type_t::GPU_TEMP, gpuInfo.gpuTemp };
-    data[13] = { data_type_t::GPU_VRAM_LOAD, (uint64_t)gpuInfo.vramLoad };
-    data[14] = { data_type_t::GPU_VRAM_TOTAL, gpuInfo.vramTotal };
-    data[15] = { data_type_t::GPU_VRAM_USED, gpuInfo.vramUsed };
-    data[16] = { data_type_t::GPU_POWER, gpuInfo.gpuPower };
+    data[7] =  { data_type_t::NET_IN, (uint64_t)(netInfo.netIn * 100.0) };
+    data[8] =  { data_type_t::NET_OUT, (uint64_t)(netInfo.netOut * 100.0) };
+    data[9] =  { data_type_t::GPU_LOAD, (uint64_t)gpuInfo.gpuLoad };
+    data[10] = { data_type_t::GPU_CLOCK, gpuInfo.gpuClock };
+    data[11] = { data_type_t::GPU_TEMP, gpuInfo.gpuTemp };
+    data[12] = { data_type_t::GPU_VRAM_LOAD, (uint64_t)gpuInfo.vramLoad };
+    data[13] = { data_type_t::GPU_VRAM_TOTAL, gpuInfo.vramTotal };
+    data[14] = { data_type_t::GPU_VRAM_USED, gpuInfo.vramUsed };
+    data[15] = { data_type_t::GPU_POWER, gpuInfo.gpuPower };
 
     sendPacket(CMD_DATA, (uint8_t*)data, sizeof(data));
 }
@@ -85,8 +84,11 @@ void DisplayHandler::startCOM()
 
     serial.setParent(this);
     serial.setPortName(comPort);
-    connect(&serial, &QSerialPort::readyRead, this, &DisplayHandler::serialReadyRead);
     serial.setBaudRate(baudrate);
+
+    if (!connect(&serial, &QSerialPort::readyRead, this, &DisplayHandler::serialReadyRead)) {
+        qWarning("Failed to connect slot to QSerialPort::readyRead!");
+    }
 
     if (!serial.open(QIODevice::ReadWrite)) {
         qWarning().nospace() << "An error occured while opening COM port!" << " [Port: " << comPort << ", Baudrate: " << baudrate << ", Error: " << serial.error() << "]";
@@ -94,10 +96,7 @@ void DisplayHandler::startCOM()
     else {
         serial.setDataTerminalReady(true); //Necessary to make the Adafruit Feather M0+ correctly detect a working connection
         sendPacket(CMD_STARTUP, nullptr, 0);
-
-        if(settings.value("display_dark_mode").toBool()) {
-            setDisplayDarkMode(true);
-        }
+        setDisplayDarkMode(settings.value("display_dark_mode", false).toBool());
     }
 }
 
