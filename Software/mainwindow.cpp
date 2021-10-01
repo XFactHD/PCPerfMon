@@ -37,7 +37,8 @@ MainWindow::MainWindow(bool startInTray, QWidget *parent)
 
     //Setup sys tray menu
     sysTrayMenu = new QMenu(this);
-    sysTrayMenu->addAction("Show", this, SLOT(showSysTrayMenu()));
+    sysTrayMenu->addAction("Show", this, SLOT(unhideWindow()));
+    sysTrayMenu->addAction("Restart COM", &display, SLOT(restartCOM()));
     sysTrayMenu->addAction("Exit", this, SLOT(close()));
     sysTrayIcon.setContextMenu(sysTrayMenu);
     startup->pushProgress(6);
@@ -45,6 +46,7 @@ MainWindow::MainWindow(bool startInTray, QWidget *parent)
     //Configure application details
     QCoreApplication::setOrganizationName("dc");
     QCoreApplication::setApplicationName("PCPerfMon");
+    QSettings settings;
     startup->pushProgress(5);
 
     //Configure color palettes
@@ -70,7 +72,7 @@ MainWindow::MainWindow(bool startInTray, QWidget *parent)
     startup->pushProgress(6);
 
     //Set configured app style
-    darkMode = QSettings().value("app_dark_mode").toBool();
+    darkMode = settings.value("app_dark_mode").toBool();
     configureAppStyle(darkMode);
     startup->pushProgress(6);
 
@@ -115,7 +117,9 @@ MainWindow::MainWindow(bool startInTray, QWidget *parent)
 
     display.init();
     connect(&perf, &PerfReader::perfdataReady, &display, &DisplayHandler::perfdataReady);
+    connect(&display, &DisplayHandler::serialTimedOut, this, &MainWindow::handleSerialTimedOut);
     showSerialStatus();
+    showTimeoutNotif = settings.value("show_timeout_notification").toBool();
     startup->pushProgress(6);
 
     connect(ui->menuMain->actions().at(0), &QAction::triggered, this, &MainWindow::menuOpenSettings);
@@ -123,7 +127,7 @@ MainWindow::MainWindow(bool startInTray, QWidget *parent)
     connect(ui->menuMain->actions().at(2), &QAction::triggered, this, &QCoreApplication::quit);
     startup->pushProgress(5);
 
-    connect(&timer, &QTimer::timeout, this, &MainWindow::timerTimedOut);
+    connect(&timer, &QTimer::timeout, &perf, &PerfReader::queryNewData);
     timer.start(1000);
     startup->pushProgress(5);
     startup->deleteLater();
@@ -310,11 +314,6 @@ void MainWindow::createGPUChart()
     ui->plot_gpu->setVisible(false);
 }
 
-void MainWindow::timerTimedOut()
-{
-    perf.queryNewData();
-}
-
 void MainWindow::perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo)
 {
     //The first data point must not be displayed
@@ -470,6 +469,8 @@ void MainWindow::menuOpenSettings()
 
     connect(&options, &DialogOptions::setAppDarkMode, this, &MainWindow::setAppDarkMode);
     connect(&options, &DialogOptions::setDisplayDarkMode, &display, &DisplayHandler::setDisplayDarkMode);
+    connect(&options, &DialogOptions::setDisplayBrightness, &display, &DisplayHandler::setDisplayBrightness);
+    connect(&options, &DialogOptions::setShowTimeoutNotifications, this, &MainWindow::setShowTimeoutNotifications);
 
     options.exec();
 }
@@ -494,11 +495,17 @@ void MainWindow::newIPCConnection() {
 
     QString msg = sock->readAll();
     if (msg.compare("show") == 0) {
-        showSysTrayMenu();
+        unhideWindow();
     }
 
     sock->close();
     delete sock;
+}
+
+void MainWindow::handleSerialTimedOut() {
+    if (showTimeoutNotif) {
+        sysTrayIcon.showMessage(QApplication::applicationDisplayName(), "Serial connection to display timed out!", windowIcon());
+    }
 }
 
 QString MainWindow::formatScientific(double value, int precision, QVector<QString> unit)
@@ -539,21 +546,11 @@ void MainWindow::sysTrayIconActivated(QSystemTrayIcon::ActivationReason reason)
         emit sysTrayIcon.activated(QSystemTrayIcon::Context);
     }
     else if(reason == QSystemTrayIcon::DoubleClick) {
-        if(isHidden()) {
-            showNormal();
-            raise();
-            setFocus();
-            activateWindow();
-
-            if(ui->plot_cpu->isVisible()) { ui->plot_cpu->replot(); }
-            if(ui->plot_ram->isVisible()) { ui->plot_ram->replot(); }
-            if(ui->plot_net->isVisible()) { ui->plot_net->replot(); }
-            if(ui->plot_gpu->isVisible()) { ui->plot_gpu->replot(); }
-        }
+        unhideWindow();
     }
 }
 
-void MainWindow::showSysTrayMenu()
+void MainWindow::unhideWindow()
 {
     if(isHidden()) {
         showNormal();

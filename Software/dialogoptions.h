@@ -23,6 +23,8 @@ public:
 signals:
     void setAppDarkMode(bool dark);
     void setDisplayDarkMode(bool dark);
+    void setDisplayBrightness(uint8_t brightness);
+    void setShowTimeoutNotifications(bool value);
 
 private slots:
     void on_DialogOptions_finished(int result);

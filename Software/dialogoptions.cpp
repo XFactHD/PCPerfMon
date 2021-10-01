@@ -26,6 +26,12 @@ DialogOptions::DialogOptions(QWidget *parent) :
     if(settings.contains("display_dark_mode")) {
         ui->checkBox_disp_dark->setChecked(settings.value("display_dark_mode").toBool());
     }
+    if(settings.contains("display_brightness")) {
+        ui->slider_brightness->setValue(settings.value("display_brightness").toInt());
+    }
+    if(settings.contains("show_timeout_notification")) {
+        ui->checkBox_timeout_notif->setChecked(settings.value("show_timeout_notification").toBool());
+    }
 }
 
 DialogOptions::~DialogOptions()
@@ -48,6 +54,14 @@ void DialogOptions::on_DialogOptions_finished(int result)
         bool dispDark = ui->checkBox_disp_dark->isChecked();
         settings.setValue("display_dark_mode", dispDark);
         emit setDisplayDarkMode(dispDark);
+
+        int brightness = ui->slider_brightness->value();
+        settings.setValue("display_brightness", brightness);
+        emit setDisplayBrightness(brightness);
+
+        bool timeoutNotifs = ui->checkBox_timeout_notif->isChecked();
+        settings.setValue("show_timeout_notification", timeoutNotifs);
+        emit setShowTimeoutNotifications(timeoutNotifs);
     }
 }
 

@@ -66,6 +66,9 @@ public:
     qint32 getBaudrate() { return serial.baudRate(); }
     void shutdown();
 
+signals:
+    void serialTimedOut();
+
 public slots:
     void restartCOM();
     void perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo);

@@ -72,12 +72,13 @@ public:
     void initialize();
     void shutdown();
 
-    void queryNewData();
-
     cpu_info_t getCPUInfo();
     ram_info_t getRAMInfo();
     net_info_t getNetInfo();
     gpu_info_t getGPUInfo();
+
+public slots:
+    void queryNewData();
 
 signals:
     void perfdataReady(cpu_info_t, ram_info_t, net_info_t, gpu_info_t);

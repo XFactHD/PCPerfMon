@@ -41,11 +41,9 @@ public slots:
 
     void aboutToQuit();
 
-    void showSysTrayMenu();
+    void unhideWindow();
 
 private slots:
-    void timerTimedOut();
-
     void perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo);
 
     void on_pushButton_cpu_clicked();
@@ -61,6 +59,10 @@ private slots:
     void sysTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
 
     void newIPCConnection();
+
+    void setShowTimeoutNotifications(bool value) { showTimeoutNotif = value; }
+
+    void handleSerialTimedOut();
 
 protected:
     virtual void changeEvent(QEvent* event);
@@ -88,6 +90,7 @@ private:
     QPalette darkPalette;
     QPalette darkProgressBarPalette;
     bool darkMode;
+    bool showTimeoutNotif;
 
     PerfReader perf;
     QTimer timer;

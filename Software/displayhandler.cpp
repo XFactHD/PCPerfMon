@@ -165,5 +165,7 @@ void DisplayHandler::timerTimedOut()
         qWarning("ACK timed out, closing connection!");
         serial.close();
         timer.stop();
+
+        emit serialTimedOut();
     }
 }
