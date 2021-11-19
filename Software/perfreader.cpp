@@ -127,24 +127,23 @@ ram_info_t PerfReader::getRAMInfo()
 
 net_info_t PerfReader::getNetInfo()
 {
-    net_info_t netInfo = { 0, 0, 0 };
-
-    PDH_STATUS status = PdhGetFormattedCounterValue(netBwCounter, PDH_FMT_LONG, NULL, netBwValue);
-    if (status == ERROR_SUCCESS)
-    {
-        netInfo.netIn = netBwValue->longValue / 1000.0;
-        netInfo.netOut = netBwValue->longValue / 1000.0;
+    if (netBandwidth == -1.0) {
+        PDH_STATUS status = PdhGetFormattedCounterValue(netBwCounter, PDH_FMT_LONG, NULL, netBwValue);
+        if (status == ERROR_SUCCESS) {
+            netBandwidth = netBwValue->longValue * 8.0 / 1000.0;
+        }
     }
-    status = PdhGetFormattedCounterValue(netInCounter, PDH_FMT_LONG, NULL, netInValue);
-    if (status == ERROR_SUCCESS)
-    {
-        netInfo.netIn = netInValue->longValue * 8 / 1000.0;
+
+    net_info_t netInfo = { netBandwidth, 0, 0 };
+
+    PDH_STATUS status = PdhGetFormattedCounterValue(netInCounter, PDH_FMT_LONG, NULL, netInValue);
+    if (status == ERROR_SUCCESS) {
+        netInfo.netIn = netInValue->longValue * 8.0 / 1000.0;
     }
 
     status = PdhGetFormattedCounterValue(netOutCounter, PDH_FMT_LONG, NULL, netOutValue);
-    if (status == ERROR_SUCCESS)
-    {
-        netInfo.netOut = netOutValue->longValue * 8 / 1000.0;
+    if (status == ERROR_SUCCESS) {
+        netInfo.netOut = netOutValue->longValue * 8.0 / 1000.0;
     }
 
     return netInfo;

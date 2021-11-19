@@ -133,6 +133,7 @@ private:
     QMutex mutex;
     QWaitCondition condition;
 
+    double netBandwidth = -1.0;
     NvMLReader* gpu;
     OHMWrapper* ohm;
 };

@@ -189,7 +189,7 @@ void MainWindow::setPlotColors(QCustomPlot* plot, QColor background, QColor fore
 
 void MainWindow::createCPUChart()
 {
-    ui->plot_cpu->xAxis->setRange(0, 60, Qt::AlignLeft);
+    ui->plot_cpu->xAxis->setRange(0, PLOT_X_WIDTH, Qt::AlignLeft);
     ui->plot_cpu->yAxis->setRange(0, 100);
 
     ui->plot_cpu->axisRect()->setAutoMargins(QCP::msLeft | QCP::msTop | QCP::msRight);
@@ -219,7 +219,7 @@ void MainWindow::createCPUChart()
 
 void MainWindow::createRAMChart()
 {
-    ui->plot_ram->xAxis->setRange(0, 60, Qt::AlignLeft);
+    ui->plot_ram->xAxis->setRange(0, PLOT_X_WIDTH, Qt::AlignLeft);
     ui->plot_ram->yAxis->setRange(0, 100);
 
     ui->plot_ram->axisRect()->setAutoMargins(QCP::msLeft | QCP::msTop | QCP::msRight);
@@ -247,7 +247,7 @@ void MainWindow::createRAMChart()
 
 void MainWindow::createNetChart()
 {
-    ui->plot_net->xAxis->setRange(0, 60, Qt::AlignLeft);
+    ui->plot_net->xAxis->setRange(0, PLOT_X_WIDTH, Qt::AlignLeft);
     ui->plot_net->yAxis->setRange(0, 100);
 
     ui->plot_net->axisRect()->setAutoMargins(QCP::msLeft | QCP::msTop | QCP::msRight);
@@ -280,7 +280,7 @@ void MainWindow::createNetChart()
 
 void MainWindow::createGPUChart()
 {
-    ui->plot_gpu->xAxis->setRange(0, 60, Qt::AlignLeft);
+    ui->plot_gpu->xAxis->setRange(0, PLOT_X_WIDTH, Qt::AlignLeft);
     ui->plot_gpu->yAxis->setRange(0, 100);
 
     ui->plot_gpu->axisRect()->setAutoMargins(QCP::msLeft | QCP::msTop | QCP::msRight);
@@ -316,33 +316,22 @@ void MainWindow::createGPUChart()
 
 void MainWindow::perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo)
 {
-    //The first data point must not be displayed
-    static bool first = true;
-    if(first) {
-        first = false;
-
-        ui->progressBar_netIn->setRange(0, netInfo.netIn);
-        ui->progressBar_netOut->setRange(0, netInfo.netOut);
-
-        return;
+    if(dataIdx == 0) {
+        ui->progressBar_netIn->setRange(0, netInfo.bandwidth);
+        ui->progressBar_netOut->setRange(0, netInfo.bandwidth);
     }
-
-    constexpr double multiplier = 1; //1 for 1 second interval, 0.5 for half second interval
-    static uint64_t idx = 0;
-
-    double timeStamp = ((double)idx) * multiplier;
 
     //Display CPU data
     int cpuLoad = std::round(cpuInfo.cpuLoad * 100.0f);
     ui->progressBar_cpu->setValue(cpuLoad);
-    ui->plot_cpu->graph(0)->addData(timeStamp, cpuLoad);
-    ui->plot_cpu->graph(1)->addData(timeStamp, cpuInfo.cpuTemp);
+    ui->plot_cpu->graph(0)->addData(dataIdx, cpuLoad);
+    ui->plot_cpu->graph(1)->addData(dataIdx, cpuInfo.cpuTemp);
 
     //Display RAM data
     ui->progressBar_ram->setValue(ramInfo.ramLoad);
-    QString ramText = QString::number(ramInfo.ramUsed / 1073741824.0, 'f', 1) + "/" + QString::number(ramInfo.ramTotal / 1073741824.0, 'f', 1) + " GB (%p%)";
+    QString ramText = QString::number(ramInfo.ramUsed / ONE_GIGABYTE, 'f', 1) + "/" + QString::number(ramInfo.ramTotal / ONE_GIGABYTE, 'f', 1) + " GB (%p%)";
     ui->progressBar_ram->setFormat(ramText);
-    ui->plot_ram->graph(0)->addData(timeStamp, ramInfo.ramLoad);
+    ui->plot_ram->graph(0)->addData(dataIdx, ramInfo.ramLoad);
 
     //Display network data
     QString netInText = formatScientific(netInfo.netIn, 1, { "KBit/s", "MBit/s", "GBit/s" });
@@ -351,27 +340,27 @@ void MainWindow::perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_
     ui->label_netOut->setText(netOutText);
     ui->progressBar_netIn->setValue(netInfo.netIn);
     ui->progressBar_netOut->setValue(netInfo.netOut);
-    ui->plot_net->graph(0)->addData(timeStamp, netInfo.netIn);
-    ui->plot_net->graph(1)->addData(timeStamp, netInfo.netOut);
-    double max = findHighest(ui->plot_net->graph(0)->data(), ui->plot_net->graph(1)->data(), 60 / multiplier);
+    ui->plot_net->graph(0)->addData(dataIdx, netInfo.netIn);
+    ui->plot_net->graph(1)->addData(dataIdx, netInfo.netOut);
+    double max = findHighest(ui->plot_net->graph(0)->data(), ui->plot_net->graph(1)->data(), PLOT_X_WIDTH);
     if(max < 100.0) { max = 100.0; }
     ui->plot_net->yAxis->setRange(0, max);
 
     //Display GPU data
     ui->progressBar_gpuLoad->setValue(gpuInfo.gpuLoad);
     ui->progressBar_gpuVram->setValue(gpuInfo.vramLoad);
-    QString vramText = QString::number(gpuInfo.vramUsed / 1073741824.0, 'f', 1) + "/" + QString::number(gpuInfo.vramTotal / 1073741824.0, 'f', 1) + " GB (%p%)";
+    QString vramText = QString::number(gpuInfo.vramUsed / ONE_GIGABYTE, 'f', 1) + "/" + QString::number(gpuInfo.vramTotal / ONE_GIGABYTE, 'f', 1) + " GB (%p%)";
     ui->progressBar_gpuVram->setFormat(vramText);
-    ui->plot_gpu->graph(0)->addData(timeStamp, gpuInfo.gpuLoad);
-    ui->plot_gpu->graph(1)->addData(timeStamp, gpuInfo.vramLoad);
-    ui->plot_gpu->graph(2)->addData(timeStamp, gpuInfo.gpuTemp);
+    ui->plot_gpu->graph(0)->addData(dataIdx, gpuInfo.gpuLoad);
+    ui->plot_gpu->graph(1)->addData(dataIdx, gpuInfo.vramLoad);
+    ui->plot_gpu->graph(2)->addData(dataIdx, gpuInfo.gpuTemp);
 
     //Advance x axis if necessary
-    if(idx >= 60 / multiplier) {
-        ui->plot_cpu->xAxis->setRange(timeStamp, 60, Qt::AlignRight);
-        ui->plot_ram->xAxis->setRange(timeStamp, 60, Qt::AlignRight);
-        ui->plot_net->xAxis->setRange(timeStamp, 60, Qt::AlignRight);
-        ui->plot_gpu->xAxis->setRange(timeStamp, 60, Qt::AlignRight);
+    if(dataIdx >= PLOT_X_WIDTH) {
+        ui->plot_cpu->xAxis->setRange(dataIdx, PLOT_X_WIDTH, Qt::AlignRight);
+        ui->plot_ram->xAxis->setRange(dataIdx, PLOT_X_WIDTH, Qt::AlignRight);
+        ui->plot_net->xAxis->setRange(dataIdx, PLOT_X_WIDTH, Qt::AlignRight);
+        ui->plot_gpu->xAxis->setRange(dataIdx, PLOT_X_WIDTH, Qt::AlignRight);
     }
 
     //Redraw graphs (only when the window is open and only the visible graph)
@@ -384,7 +373,7 @@ void MainWindow::perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_
 
     showSerialStatus();
 
-    idx++;
+    dataIdx++;
 }
 
 void MainWindow::showSerialStatus()

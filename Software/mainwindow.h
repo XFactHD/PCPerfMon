@@ -24,6 +24,9 @@
 #define WPRINT_DEBUG(msg)
 #endif
 
+#define PLOT_X_WIDTH 60 //60 seconds
+#define ONE_GIGABYTE 1073741824.0
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -91,6 +94,7 @@ private:
     QPalette darkProgressBarPalette;
     bool darkMode;
     bool showTimeoutNotif;
+    uint64_t dataIdx = 0;
 
     PerfReader perf;
     QTimer timer;

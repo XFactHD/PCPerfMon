@@ -10,7 +10,7 @@
 
 #include "perfreader.h"
 
-#define ACK_TIMEOUT 500
+#define ACK_TIMEOUT 2000
 
 #define CMD_STARTUP 0x10
 #define CMD_SHUTDOWN 0x11
