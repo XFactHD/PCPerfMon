@@ -13,7 +13,12 @@
 
 #define CFG_DARK_MODE 0x01
 #define CFG_BRIGHTNESS 0x02
+#define CFG_TIMEOUT 0x03
 
 void handleConfig(const uint8_t* data, uint8_t length);
+
+void commandReceived();
+void checkConnection();
+bool isConnected();
 
 #endif //CMD_HPP

@@ -55,6 +55,8 @@ void loop() {
             }
             default: break;
         }
+        commandReceived();
         Serial.write(CMD_ACK);
     }
+    checkConnection();
 }

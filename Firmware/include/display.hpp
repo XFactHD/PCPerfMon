@@ -8,6 +8,7 @@
 
 #include "icons.h"
 #include "data.hpp"
+#include "cmd.hpp"
 
 #define PCB_V1
 
@@ -39,6 +40,7 @@ void initDisplay();
 void configureColors();
 void drawBackground();
 void printLabels();
+void drawConnection(bool connected);
 
 void printData(uint8_t* data, uint8_t length);
 void printScientific(double value, double divider, int len, int decimals, const char** units, int steps);

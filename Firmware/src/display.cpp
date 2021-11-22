@@ -31,6 +31,7 @@ void initDisplay() {
     configureColors();
     drawBackground();
     printLabels();
+    drawConnection(false);
 }
 
 void configureColors() {
@@ -57,6 +58,8 @@ void drawBackground() {
     display.drawRect( 80, 0, 80, 240, colorLine);
     display.drawRect(160, 0, 80, 240, colorLine);
     display.drawRect(240, 0, 80, 240, colorLine);
+    display.fillRect(0, 225, 320, 15, colorBackground);
+    display.drawRect(0, 225, 320, 15, colorLine);
 
     display.setTextSize(2);
     display.setTextColor(colorText, colorHeader);
@@ -166,6 +169,10 @@ void printLabels() {
             case data_type_t::DATA_TYPE_END: break;
         }
     }
+}
+
+void drawConnection(bool connected) {
+    display.fillCircle(7, 232, 4, connected ? TFT_GREEN : TFT_RED);
 }
 
 void printData(uint8_t* data, uint8_t length) {
@@ -300,7 +307,7 @@ void printData(uint8_t* data, uint8_t length) {
         }
 
         uint32_t end = millis();
-        display.setCursor(2, 230);
+        display.setCursor(14, 229);
         display.print(end - start);
         display.print(" ms");
     }
@@ -333,6 +340,7 @@ void switchDarkMode(bool on) {
         configureColors();
         drawBackground();
         printLabels();
+        drawConnection(isConnected());
     }
 }
 
