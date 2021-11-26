@@ -5,35 +5,32 @@ MainWindow::MainWindow(bool startInTray, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow), sysTrayIcon(this), perf(this), timer(this), display(this), serialStatus(this)
 {
-    WidgetStartup* startup = new WidgetStartup(startInTray);
+    WidgetStartup* startup = new WidgetStartup(16, startInTray);
 
+    startup->initial("Load fonts");
     monoFont = QFont("Monospaced");
     monoFont.setStyleHint(QFont::Monospace);
     setFont(monoFont);
-    startup->pushProgress(5);
 
+    startup->step("Setup UI");
     ui->setupUi(this);
-    startup->pushProgress(6);
 
+    startup->step("Setup single instance management");
     connect(&server, &QLocalServer::newConnection, this, &MainWindow::newIPCConnection);
     server.listen("pcperfmon");
-    startup->pushProgress(6);
 
+    startup->step("Configure window");
     //Disable window resizing and maximizing
     setWindowFlag(Qt::MSWindowsFixedSizeDialogHint, true);
     setWindowFlag(Qt::WindowContextHelpButtonHint, false);
-    startup->pushProgress(5);
-
-    //Set window icon
     setWindowIcon(QIcon("icon.ico"));
-    startup->pushProgress(5);
 
+    startup->step("Configure system tray icon");
     //Setup sys tray icon
     sysTrayIcon.setIcon(windowIcon());
     sysTrayIcon.setToolTip("PCPerfMon");
     connect(&sysTrayIcon, &QSystemTrayIcon::activated, this, &MainWindow::sysTrayIconActivated);
     sysTrayIcon.show();
-    startup->pushProgress(6);
 
     //Setup sys tray menu
     sysTrayMenu = new QMenu(this);
@@ -41,14 +38,14 @@ MainWindow::MainWindow(bool startInTray, QWidget *parent)
     sysTrayMenu->addAction("Restart COM", &display, SLOT(restartCOM()));
     sysTrayMenu->addAction("Exit", this, SLOT(close()));
     sysTrayIcon.setContextMenu(sysTrayMenu);
-    startup->pushProgress(6);
 
+    startup->step("Configure core application");
     //Configure application details
     QCoreApplication::setOrganizationName("dc");
     QCoreApplication::setApplicationName("PCPerfMon");
     QSettings settings;
-    startup->pushProgress(5);
 
+    startup->step("Initialise color palettes");
     //Configure color palettes
     darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
     darkPalette.setColor(QPalette::WindowText, Qt::white);
@@ -69,20 +66,20 @@ MainWindow::MainWindow(bool startInTray, QWidget *parent)
 
     lightProgressBarPalette.setColor(QPalette::Highlight, QColor(0, 210, 0));
     lightProgressBarPalette.setColor(QPalette::HighlightedText, Qt::black);
-    startup->pushProgress(6);
 
+    startup->step("Configure app style");
     //Set configured app style
     darkMode = settings.value("app_dark_mode").toBool();
     configureAppStyle(darkMode);
-    startup->pushProgress(6);
 
+    startup->step("Build charts");
     //Create charts
     createCPUChart();
     createRAMChart();
     createNetChart();
     createGPUChart();
-    startup->pushProgress(6);
 
+    startup->step("Configure interface components");
     //Configure mouse event transparency
     ui->label_cpu->setAttribute(Qt::WA_TransparentForMouseEvents);
     ui->progressBar_cpu->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -96,40 +93,41 @@ MainWindow::MainWindow(bool startInTray, QWidget *parent)
     ui->label_gpu->setAttribute(Qt::WA_TransparentForMouseEvents);
     ui->progressBar_gpuLoad->setAttribute(Qt::WA_TransparentForMouseEvents);
     ui->progressBar_gpuVram->setAttribute(Qt::WA_TransparentForMouseEvents);
-    startup->pushProgress(5);
 
+    startup->step("Register meta types");
     //Add custom meta types
     qRegisterMetaType<cpu_info_t>("cpu_info_t");
     qRegisterMetaType<ram_info_t>("ram_info_t");
     qRegisterMetaType<net_info_t>("net_info_t");
     qRegisterMetaType<gpu_info_t>("gpu_info_t");
-    startup->pushProgress(5);
 
+    startup->step("Initialize data collection");
     //Start components and connect signals
     perf.startAndWaitUntilReady();
     connect(&perf, &PerfReader::perfdataReady, this, &MainWindow::perfdataReady);
-    startup->pushProgress(6);
 
+    startup->step("Build serial status display");
     serialStatus.setText("Serial: Disconnected - Port: [Invalid] - Baudrate: -1");
     serialStatus.setContentsMargins(0, 0, 10, 0);
     ui->statusBar->addPermanentWidget(&serialStatus);
-    startup->pushProgress(6);
 
+    startup->step("Initialize serial connection");
     display.init();
     connect(&perf, &PerfReader::perfdataReady, &display, &DisplayHandler::perfdataReady);
     connect(&display, &DisplayHandler::serialTimedOut, this, &MainWindow::handleSerialTimedOut);
     showSerialStatus();
     showTimeoutNotif = settings.value("show_timeout_notification").toBool();
-    startup->pushProgress(6);
 
+    startup->step("Setup events");
     connect(ui->menuMain->actions().at(0), &QAction::triggered, this, &MainWindow::menuOpenSettings);
     connect(ui->menuMain->actions().at(1), &QAction::triggered, &display, &DisplayHandler::restartCOM);
     connect(ui->menuMain->actions().at(2), &QAction::triggered, this, &QCoreApplication::quit);
-    startup->pushProgress(5);
 
+    startup->step("Configure interval timer");
     connect(&timer, &QTimer::timeout, &perf, &PerfReader::queryNewData);
     timer.start(1000);
-    startup->pushProgress(5);
+
+    startup->step("Done");
     startup->deleteLater();
 }
 
