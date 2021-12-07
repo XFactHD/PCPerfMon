@@ -23,23 +23,34 @@ void DisplayHandler::perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_i
 {
     if (!active || !isConnected()) { return; }
 
-    data_point_t data[17];
-    data[0] =  { data_type_t::CPU_LOAD, (uint64_t)std::round(cpuInfo.cpuLoad * 100.0f)};
-    data[1] =  { data_type_t::CPU_CLOCK, cpuInfo.cpuClock };
-    data[2] =  { data_type_t::CPU_TEMP, (uint64_t)cpuInfo.cpuTemp };
-    data[3] =  { data_type_t::CPU_POWER, cpuInfo.cpuPower };
-    data[4] =  { data_type_t::RAM_LOAD, (uint64_t)ramInfo.ramLoad };
-    data[5] =  { data_type_t::RAM_TOTAL, ramInfo.ramTotal };
-    data[6] =  { data_type_t::RAM_USED, ramInfo.ramUsed };
-    data[7] =  { data_type_t::NET_IN, (uint64_t)(netInfo.netIn * 100.0) };
-    data[8] =  { data_type_t::NET_OUT, (uint64_t)(netInfo.netOut * 100.0) };
-    data[9] =  { data_type_t::GPU_LOAD, (uint64_t)gpuInfo.gpuLoad };
-    data[10] = { data_type_t::GPU_CLOCK, gpuInfo.gpuClock };
-    data[11] = { data_type_t::GPU_TEMP, gpuInfo.gpuTemp };
-    data[12] = { data_type_t::GPU_VRAM_LOAD, (uint64_t)gpuInfo.vramLoad };
-    data[13] = { data_type_t::GPU_VRAM_TOTAL, gpuInfo.vramTotal };
-    data[14] = { data_type_t::GPU_VRAM_USED, gpuInfo.vramUsed };
-    data[15] = { data_type_t::GPU_POWER, gpuInfo.gpuPower };
+    // Secondary CPU clock higher than 0 indicates a hybrid CPU
+    if (hybridCpu != (cpuInfo.cpuClockSecondary > 0)) {
+        hybridCpu = cpuInfo.cpuClockSecondary > 0;
+
+        uint8_t data[] = { CFG_HYBRID_CPU, hybridCpu };
+        sendPacket(CMD_CFG, data, 2);
+    }
+
+    data_point_t data[(uint8_t)data_type_t::DATA_TYPE_END];
+    size_t idx = 0;
+
+    data[idx++] = { data_type_t::CPU_LOAD, (uint64_t)std::round(cpuInfo.cpuLoad * 100.0f)};
+    data[idx++] = { data_type_t::CPU_CLOCK, cpuInfo.cpuClockMain };
+    if (hybridCpu) { data[idx++] = { data_type_t::CPU_CLOCK_SEC, cpuInfo.cpuClockSecondary }; }
+    data[idx++] = { data_type_t::CPU_TEMP, (uint64_t)cpuInfo.cpuTemp };
+    data[idx++] = { data_type_t::CPU_POWER, cpuInfo.cpuPower };
+    data[idx++] = { data_type_t::RAM_LOAD, (uint64_t)ramInfo.ramLoad };
+    data[idx++] = { data_type_t::RAM_TOTAL, ramInfo.ramTotal };
+    data[idx++] = { data_type_t::RAM_USED, ramInfo.ramUsed };
+    data[idx++] = { data_type_t::NET_IN, (uint64_t)(netInfo.netIn * 100.0) };
+    data[idx++] = { data_type_t::NET_OUT, (uint64_t)(netInfo.netOut * 100.0) };
+    data[idx++] = { data_type_t::GPU_LOAD, (uint64_t)gpuInfo.gpuLoad };
+    data[idx++] = { data_type_t::GPU_CLOCK, gpuInfo.gpuClock };
+    data[idx++] = { data_type_t::GPU_TEMP, gpuInfo.gpuTemp };
+    data[idx++] = { data_type_t::GPU_VRAM_LOAD, (uint64_t)gpuInfo.vramLoad };
+    data[idx++] = { data_type_t::GPU_VRAM_TOTAL, gpuInfo.vramTotal };
+    data[idx++] = { data_type_t::GPU_VRAM_USED, gpuInfo.vramUsed };
+    data[idx++] = { data_type_t::GPU_POWER, gpuInfo.gpuPower };
 
     sendPacket(CMD_DATA, (uint8_t*)data, sizeof(data));
 }
@@ -74,6 +85,13 @@ void DisplayHandler::setDisplayBrightness(uint8_t percent) {
     sendPacket(CMD_CFG, data, 2);
 }
 
+void DisplayHandler::setDisplayTimeout(uint16_t timeout) {
+    if (!active || !isConnected()) { return; }
+
+    uint8_t data[] = { CFG_TIMEOUT, (uint8_t)((timeout >> 8) & 0xFF), (uint8_t)(timeout & 0xFF) };
+    sendPacket(CMD_CFG, data, 3);
+}
+
 
 
 void DisplayHandler::startCOM()
@@ -97,6 +115,7 @@ void DisplayHandler::startCOM()
         serial.setDataTerminalReady(true); //Necessary to make the Adafruit Feather M0+ correctly detect a working connection
         sendPacket(CMD_STARTUP, nullptr, 0);
         setDisplayDarkMode(settings.value("display_dark_mode", false).toBool());
+        setDisplayTimeout(settings.value("display_timeout", ACK_TIMEOUT).toUInt());
     }
 }
 

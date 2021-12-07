@@ -26,7 +26,8 @@
 
 typedef struct cpu_info {
     float cpuLoad;     //in %
-    uint16_t cpuClock; //in MHz
+    uint16_t cpuClockMain; //in MHz
+    uint16_t cpuClockSecondary; //in MHz
     uint16_t cpuTemp;  //in °C
     uint32_t cpuPower; //in W
 } cpu_info_t;

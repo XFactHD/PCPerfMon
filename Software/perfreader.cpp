@@ -102,10 +102,14 @@ void PerfReader::queryNewData()
 
 cpu_info_t PerfReader::getCPUInfo()
 {
-    cpu_info_t cpuInfo = { getCPULoad(), 0, 0 , 0};
+    cpu_info_t cpuInfo = { getCPULoad(), 0, 0, 0, 0 };
 
     ohm->update();
-    cpuInfo.cpuClock = ohm->getCpuClockAvg();
+
+    std::pair<uint16_t, uint16_t> clock = ohm->getCpuClockAvg();
+    cpuInfo.cpuClockMain = clock.first;
+    cpuInfo.cpuClockSecondary = clock.second;
+
     cpuInfo.cpuTemp = ohm->getCpuPkgTemp();
     cpuInfo.cpuPower = ohm->getCpuPkgPower();
 

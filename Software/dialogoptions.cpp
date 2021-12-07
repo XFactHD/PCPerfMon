@@ -29,6 +29,9 @@ DialogOptions::DialogOptions(QWidget *parent) :
     if(settings.contains("display_brightness")) {
         ui->slider_brightness->setValue(settings.value("display_brightness").toInt());
     }
+    if(settings.contains("display_timeout")) {
+        ui->spinBox_timeout->setValue(settings.value("display_timeout").toInt());
+    }
     if(settings.contains("show_timeout_notification")) {
         ui->checkBox_timeout_notif->setChecked(settings.value("show_timeout_notification").toBool());
     }
@@ -58,6 +61,10 @@ void DialogOptions::on_DialogOptions_finished(int result)
         int brightness = ui->slider_brightness->value();
         settings.setValue("display_brightness", brightness);
         emit setDisplayBrightness(brightness);
+
+        int timeout = ui->spinBox_timeout->value();
+        settings.setValue("display_timeout", timeout);
+        emit setDisplayTimeout(timeout);
 
         bool timeoutNotifs = ui->checkBox_timeout_notif->isChecked();
         settings.setValue("show_timeout_notification", timeoutNotifs);

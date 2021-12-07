@@ -25,6 +25,12 @@ void handleConfig(const uint8_t* data, uint8_t length) {
             }
             break;
         }
+        case CFG_HYBRID_CPU: {
+            if (length == 2) {
+                switchHybridCpu(data[1]);
+            }
+            break;
+        }
         default: break;
     }
 }

@@ -14,6 +14,7 @@
 #define CFG_DARK_MODE 0x01
 #define CFG_BRIGHTNESS 0x02
 #define CFG_TIMEOUT 0x03
+#define CFG_HYBRID_CPU 0x04
 
 void handleConfig(const uint8_t* data, uint8_t length);
 

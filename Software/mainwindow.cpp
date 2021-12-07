@@ -457,6 +457,7 @@ void MainWindow::menuOpenSettings()
     connect(&options, &DialogOptions::setAppDarkMode, this, &MainWindow::setAppDarkMode);
     connect(&options, &DialogOptions::setDisplayDarkMode, &display, &DisplayHandler::setDisplayDarkMode);
     connect(&options, &DialogOptions::setDisplayBrightness, &display, &DisplayHandler::setDisplayBrightness);
+    connect(&options, &DialogOptions::setDisplayTimeout, &display, &DisplayHandler::setDisplayTimeout);
     connect(&options, &DialogOptions::setShowTimeoutNotifications, this, &MainWindow::setShowTimeoutNotifications);
 
     options.exec();

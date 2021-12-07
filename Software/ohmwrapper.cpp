@@ -26,16 +26,16 @@ void OHMWrapper::init()
     }
 }
 
-uint16_t OHMWrapper::getCpuClockAvg()
+std::pair<uint16_t, uint16_t> OHMWrapper::getCpuClockAvg()
 {
-    if (!ready) { return 0; }
+    if (!ready) { return std::pair<uint16_t, uint16_t>(0, 0); }
 
     ohm->write("cpu_clock_avg\r\n");
     ohm->waitForBytesWritten();
 
     ohm->waitForReadyRead();
-    QByteArray data = ohm->read(64);
-    return QString::fromUtf8(data).toUInt();
+    QStringList data = QString::fromUtf8(ohm->read(64)).split(",");
+    return std::pair<uint16_t, uint16_t>(data[0].toUInt(), data.size() > 1 ? data[1].toUInt() : 0);
 }
 
 uint16_t OHMWrapper::getCpuPkgTemp()

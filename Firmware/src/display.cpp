@@ -14,6 +14,7 @@ ST7789 display = ST7789(TFT_RST, TFT_RD, TFT_WR, TFT_CS, TFT_DC, &PORT->Group[PO
 const char* netUnits[] = { "KBit/s", "MBit/s", "GBit/s" };
 
 bool darkMode = false;
+bool hybridCpu = false;
 uint8_t brightness = 255;
 uint16_t colorLine = 0;
 uint16_t colorHeader = 0;
@@ -93,13 +94,16 @@ void printLabels() {
                 display.print("Frequency:");
                 break;
             }
+            case data_type_t::CPU_CLOCK_SEC: {
+                break;
+            }
             case data_type_t::CPU_TEMP: {
-                display.setCursor(10, 85);
+                display.setCursor(10, 95);
                 display.print("Temp:    C");
                 break;
             }
             case data_type_t::CPU_POWER: {
-                display.setCursor(10, 100);
+                display.setCursor(10, 110);
                 display.print("Power:");
                 break;
             }
@@ -198,16 +202,23 @@ void printData(uint8_t* data, uint8_t length) {
                     }
                     break;
                 }
+                case data_type_t::CPU_CLOCK_SEC: {
+                    if (dataPoint.data >= 0 && dataPoint.data <= 9999) {
+                        display.setCursor(28, 80);
+                        display.printf("%4dMHz", dataPoint.data);
+                    }
+                    break;
+                }
                 case data_type_t::CPU_TEMP: {
                     if (dataPoint.data >= 0 && dataPoint.data <= 999) {
-                        display.setCursor(46, 85);
+                        display.setCursor(46, 95);
                         display.printf("%3d", (int) dataPoint.data);
                     }
                     break;
                 }
                 case data_type_t::CPU_POWER: {
                     if (dataPoint.data >= 0 && dataPoint.data <= 9999) {
-                        display.setCursor(40, 110);
+                        display.setCursor(40, 120);
                         display.printf("%4dW", dataPoint.data);
                     }
                     break;
@@ -341,6 +352,21 @@ void switchDarkMode(bool on) {
         drawBackground();
         printLabels();
         drawConnection(isConnected());
+    }
+}
+
+void switchHybridCpu(bool on) {
+    if (hybridCpu != on) {
+        hybridCpu = on;
+
+        display.setTextColor(hybridCpu ? colorText : colorBackground, colorBackground);
+
+        display.setCursor(10, 70);
+        display.print("P:");
+        display.setCursor(10, 80);
+        display.print("E:");
+
+        display.setTextColor(colorText, colorBackground);
     }
 }
 

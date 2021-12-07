@@ -24,6 +24,7 @@ signals:
     void setAppDarkMode(bool dark);
     void setDisplayDarkMode(bool dark);
     void setDisplayBrightness(uint8_t brightness);
+    void setDisplayTimeout(uint16_t timeout);
     void setShowTimeoutNotifications(bool value);
 
 private slots:

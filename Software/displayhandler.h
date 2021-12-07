@@ -20,10 +20,13 @@
 
 #define CFG_DARK_MODE 0x01
 #define CFG_BRIGHTNESS 0x02
+#define CFG_TIMEOUT 0x03
+#define CFG_HYBRID_CPU 0x04
 
 enum class data_type_t : uint8_t {
     CPU_LOAD,
     CPU_CLOCK,
+    CPU_CLOCK_SEC,
     CPU_TEMP,
     CPU_POWER,
     RAM_LOAD,
@@ -38,7 +41,8 @@ enum class data_type_t : uint8_t {
     GPU_VRAM_LOAD,
     GPU_VRAM_TOTAL,
     GPU_VRAM_USED,
-    GPU_POWER
+    GPU_POWER,
+    DATA_TYPE_END
 };
 
 #pragma pack(push,1)
@@ -74,6 +78,7 @@ public slots:
     void perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_info_t netInfo, gpu_info_t gpuInfo);
     void setDisplayDarkMode(bool dark);
     void setDisplayBrightness(uint8_t percent);
+    void setDisplayTimeout(uint16_t timeout);
 
 private:
     void startCOM();
@@ -87,6 +92,7 @@ private:
     QSerialPort serial;
     QQueue<cmd_t> cmdQueue;
     QTimer timer;
+    bool hybridCpu = false;
 
 private slots:
     void timerTimedOut();
