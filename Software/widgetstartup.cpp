@@ -30,6 +30,13 @@ void WidgetStartup::step(QString message)
     int value = ceil(_stepSize * (float)_currStep);
     ui->progressBar->setValue(value);
     ui->label_message->setText(message);
+    ui->label_submessage->setText("");
 
+    QEventLoop().processEvents();
+}
+
+void WidgetStartup::subStep(QString message)
+{
+    ui->label_submessage->setText(message);
     QEventLoop().processEvents();
 }

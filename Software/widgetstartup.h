@@ -19,6 +19,9 @@ public:
     void initial(QString message);
     void step(QString message);
 
+public slots:
+    void subStep(QString message);
+
 private:
     Ui::WidgetStartup *ui;
     float _stepSize;

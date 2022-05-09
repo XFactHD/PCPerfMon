@@ -49,14 +49,20 @@ void PerfReader::run()
 
 void PerfReader::initialize()
 {
+    emit startupStage("Build PDH localization");
     getCounterLocalizationTable();
 
+    emit startupStage("Open PDH query");
     openQuery();
+    emit startupStage("Initialize net counters");
     initializeNetCounters();
+    emit startupStage("Start NvMLReader");
     gpu = new NvMLReader();
     gpu->init();
+    emit startupStage("Start OHMWrapper");
     ohm = new OHMWrapper();
     ohm->init();
+    emit startupStage("PerfReader ready");
 }
 
 void PerfReader::startAndWaitUntilReady()
@@ -64,7 +70,9 @@ void PerfReader::startAndWaitUntilReady()
     start();
 
     mutex.lock();
-    condition.wait(&mutex);
+    while (!condition.wait(&mutex, 10)) {
+        QEventLoop().processEvents();
+    }
     mutex.unlock();
 }
 

@@ -5,7 +5,7 @@ MainWindow::MainWindow(bool startInTray, QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow), sysTrayIcon(this), perf(this), timer(this), display(this), serialStatus(this)
 {
-    WidgetStartup* startup = new WidgetStartup(16, startInTray);
+    WidgetStartup* startup = new WidgetStartup(17, startInTray);
 
     startup->initial("Load fonts");
     monoFont = QFont("Monospaced");
@@ -32,6 +32,7 @@ MainWindow::MainWindow(bool startInTray, QWidget *parent)
     connect(&sysTrayIcon, &QSystemTrayIcon::activated, this, &MainWindow::sysTrayIconActivated);
     sysTrayIcon.show();
 
+    startup->step("Configure system tray menu");
     //Setup sys tray menu
     sysTrayMenu = new QMenu(this);
     sysTrayMenu->addAction("Show", this, SLOT(unhideWindow()));
@@ -102,9 +103,11 @@ MainWindow::MainWindow(bool startInTray, QWidget *parent)
     qRegisterMetaType<gpu_info_t>("gpu_info_t");
 
     startup->step("Initialize data collection");
+    QMetaObject::Connection connection = connect(&perf, &PerfReader::startupStage, startup, &WidgetStartup::subStep);
     //Start components and connect signals
     perf.startAndWaitUntilReady();
     connect(&perf, &PerfReader::perfdataReady, this, &MainWindow::perfdataReady);
+    disconnect(connection);
 
     startup->step("Build serial status display");
     serialStatus.setText("Serial: Disconnected - Port: [Invalid] - Baudrate: -1");

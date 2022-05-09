@@ -82,6 +82,7 @@ public slots:
     void queryNewData();
 
 signals:
+    void startupStage(QString);
     void perfdataReady(cpu_info_t, ram_info_t, net_info_t, gpu_info_t);
 
 private:
