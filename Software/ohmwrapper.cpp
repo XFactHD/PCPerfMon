@@ -26,6 +26,17 @@ void OHMWrapper::init()
     }
 }
 
+void OHMWrapper::update()
+{
+    if (!ready) { return; }
+
+    ohm->write("update\r\n");
+    ohm->waitForBytesWritten();
+
+    ohm->waitForReadyRead();
+    ohm->read(64); //Clear buffer
+}
+
 std::pair<uint16_t, uint16_t> OHMWrapper::getCpuClockAvg()
 {
     if (!ready) { return std::pair<uint16_t, uint16_t>(0, 0); }

@@ -14,7 +14,7 @@ public:
     void init();
     void shutdown();
 
-    void update() {}
+    void update();
 
     std::pair<uint16_t, uint16_t> getCpuClockAvg();
     uint16_t getCpuPkgTemp();
