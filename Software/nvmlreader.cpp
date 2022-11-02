@@ -5,7 +5,7 @@ void NvMLReader::init()
     //Get nvml.dll from NVSMI folder
     const char* dllName = "nvml.dll"; //The nvsmi path (C:/Program Files/NVIDIA Corporation/NVSMI) must be on the system PATH
     dllHandle = LoadLibraryA(dllName);
-    if (dllHandle == NULL) { qCritical() << "Couldn't find nvml.dll"; return; }
+    if (dllHandle == NULL) { qCritical() << "[NvMLReader] Couldn't find nvml.dll"; return; }
 
     //Retrieve function pointers
     nvmlInit =                      (nvmlInit_t)                        GetProcAddress(dllHandle, "nvmlInit_v2");
@@ -33,7 +33,7 @@ void NvMLReader::init()
         nvmlDeviceGetMemoryInfo == NULL ||
         nvmlDeviceGetUtilizationRates == NULL
     ) {
-        qCritical("Failed to retrieve one or more functions from nvml.dll!");
+        qCritical("[NvMLReader] Failed to retrieve one or more functions from nvml.dll!");
         return;
     }
 
@@ -47,11 +47,11 @@ void NvMLReader::init()
     if (checkAndPrintError(ret, "nvmlDeviceGetCount")) { return; }
 
     if (count == 0) {
-        qCritical() << "No NVIDIA GPU found!";
+        qCritical() << "[NvMLReader] No NVIDIA GPU found!";
         return;
     }
     else if (count > 1) {
-        qInfo() << "Found multiple NVIDIA GPUs, only the first one will be used!";
+        qInfo() << "[NvMLReader] Found multiple NVIDIA GPUs, only the first one will be used!";
     }
 
     //Retrieve device handle
@@ -62,12 +62,12 @@ void NvMLReader::init()
     char buffer[NVML_DEVICE_NAME_BUFFER_SIZE];
     ret = nvmlDeviceGetName(device, buffer, NVML_DEVICE_NAME_BUFFER_SIZE);
     if (!checkAndPrintError(ret, "nvmlDeviceGetName")) {
-        qInfo().nospace() << "Found NVIDIA GPU with name: " << buffer;
+        qInfo().nospace() << "[NvMLReader] Found NVIDIA GPU with name: " << buffer;
     }
 
     //Ready
     ready = true;
-    qInfo("NVML reader initialized");
+    qInfo("[NvMLReader] NVML reader initialized");
 }
 
 void NvMLReader::shutdown()
@@ -131,7 +131,7 @@ uint32_t NvMLReader::getGpuPower()
 bool NvMLReader::checkAndPrintError(nvmlReturn_t ret, const char* func)
 {
     if (ret != NVML_SUCCESS) {
-        qWarning() << "Error in NVML function call (" << func << "): " << nvmlErrorString(ret);
+        qWarning() << "[NvMLReader] Error in NVML function call (" << func << "): " << nvmlErrorString(ret);
     }
     return ret != NVML_SUCCESS;
 }

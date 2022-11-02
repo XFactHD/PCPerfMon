@@ -105,11 +105,11 @@ void DisplayHandler::startCOM()
     serial.setBaudRate(baudrate);
 
     if (!connect(&serial, &QSerialPort::readyRead, this, &DisplayHandler::serialReadyRead)) {
-        qWarning("Failed to connect slot to QSerialPort::readyRead!");
+        qWarning("[DisplayHandler] Failed to connect slot to QSerialPort::readyRead!");
     }
 
     if (!serial.open(QIODevice::ReadWrite)) {
-        qWarning().nospace() << "An error occured while opening COM port!" << " [Port: " << comPort << ", Baudrate: " << baudrate << ", Error: " << serial.error() << "]";
+        qWarning().nospace() << "[DisplayHandler] An error occured while opening COM port!" << " [Port: " << comPort << ", Baudrate: " << baudrate << ", Error: " << serial.error() << "]";
     }
     else {
         serial.setDataTerminalReady(true); //Necessary to make the Adafruit Feather M0+ correctly detect a working connection
@@ -166,7 +166,7 @@ void DisplayHandler::serialReadyRead()
     QByteArray data = serial.readAll();
     if (((uint8_t)data.at(0)) == CMD_ACK) {
         if (!awaitingAck) {
-            qWarning("Received erronous ACK!");
+            qWarning("[DisplayHandler] Received erronous ACK!");
         }
         awaitingAck = false;
 
@@ -181,7 +181,7 @@ void DisplayHandler::timerTimedOut()
 {
     if (awaitingAck) {
         awaitingAck = false;
-        qWarning("ACK timed out, closing connection!");
+        qWarning("[DisplayHandler] ACK timed out, closing connection!");
         serial.close();
         timer.stop();
 

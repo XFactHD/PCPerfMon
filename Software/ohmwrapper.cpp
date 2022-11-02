@@ -11,7 +11,7 @@ void OHMWrapper::init()
     ohm->start(QIODevice::ReadWrite | QIODevice::Unbuffered);
     ready = ohm->waitForStarted();
     if (!ready) {
-        qWarning("Failed to start ohm_reader.exe!");
+        qWarning("[OHMWrapper] Failed to start ohm_reader.exe!");
         return;
     }
 
@@ -19,10 +19,10 @@ void OHMWrapper::init()
     QString result = QString::fromUtf8(ohm->read(64));
     ready = result.startsWith("ready");
     if (!ready) {
-        qWarning("ohm_reader.exe encountered an error while starting!");
+        qWarning("[OHMWrapper] ohm_reader.exe encountered an error while starting!");
     }
     else {
-        qInfo("ohm_reader.exe started succesfully!");
+        qInfo("[OHMWrapper] ohm_reader.exe started succesfully!");
     }
 }
 
@@ -87,5 +87,5 @@ void OHMWrapper::shutdown()
 
 void OHMWrapper::stderrReadyRead()
 {
-    qWarning("%s", ohm->readAllStandardError().toStdString().c_str());
+    qWarning("[OHMReader] %s", ohm->readAllStandardError().toStdString().c_str());
 }
