@@ -29,6 +29,7 @@ typedef struct cpu_info {
     uint16_t cpuClockMain; //in MHz
     uint16_t cpuClockSecondary; //in MHz
     uint16_t cpuTemp;  //in °C
+    uint16_t cpuCoreVoltage; //in V
     uint32_t cpuPower; //in W
 } cpu_info_t;
 

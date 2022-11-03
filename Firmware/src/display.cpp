@@ -102,8 +102,13 @@ void printLabels() {
                 display.print("Temp:    C");
                 break;
             }
-            case data_type_t::CPU_POWER: {
+            case data_type_t::CPU_CORE_VOLTAGE: {
                 display.setCursor(10, 110);
+                display.print("Voltage:");
+                break;
+            }
+            case data_type_t::CPU_POWER: {
+                display.setCursor(10, 135);
                 display.print("Power:");
                 break;
             }
@@ -216,9 +221,17 @@ void printData(uint8_t* data, uint8_t length) {
                     }
                     break;
                 }
+                case data_type_t::CPU_CORE_VOLTAGE: {
+                    if (dataPoint.data >= 0 && dataPoint.data <= 9999) {
+                        float value = (float) dataPoint.data / 1000.0F;
+                        display.setCursor(40, 120);
+                        display.printf("%4.2fV", value);
+                    }
+                    break;
+                }
                 case data_type_t::CPU_POWER: {
                     if (dataPoint.data >= 0 && dataPoint.data <= 9999) {
-                        display.setCursor(40, 120);
+                        display.setCursor(40, 145);
                         display.printf("%4dW", dataPoint.data);
                     }
                     break;

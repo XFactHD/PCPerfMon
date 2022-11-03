@@ -19,6 +19,7 @@ public:
     std::pair<uint16_t, uint16_t> getCpuClockAvg();
     uint16_t getCpuPkgTemp();
     uint32_t getCpuPkgPower();
+    uint32_t getCpuCoreVoltage();
 
 private slots:
     void stderrReadyRead();

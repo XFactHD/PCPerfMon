@@ -73,6 +73,18 @@ uint32_t OHMWrapper::getCpuPkgPower()
     return QString::fromUtf8(data).toUInt();
 }
 
+uint32_t OHMWrapper::getCpuCoreVoltage()
+{
+    if (!ready) { return 0; }
+
+    ohm->write("cpu_core_voltage\r\n");
+    ohm->waitForBytesWritten();
+
+    ohm->waitForReadyRead();
+    QByteArray data = ohm->read(64);
+    return QString::fromUtf8(data).toUInt();
+}
+
 void OHMWrapper::shutdown()
 {
     if (ready) {

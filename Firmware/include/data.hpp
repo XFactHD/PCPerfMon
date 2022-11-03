@@ -10,6 +10,7 @@ enum class data_type_t : uint8_t {
     CPU_CLOCK,
     CPU_CLOCK_SEC,
     CPU_TEMP,
+    CPU_CORE_VOLTAGE,
     CPU_POWER,
     RAM_LOAD,
     RAM_TOTAL,

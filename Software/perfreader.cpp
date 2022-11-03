@@ -110,7 +110,7 @@ void PerfReader::queryNewData()
 
 cpu_info_t PerfReader::getCPUInfo()
 {
-    cpu_info_t cpuInfo = { getCPULoad(), 0, 0, 0, 0 };
+    cpu_info_t cpuInfo = { getCPULoad(), 0, 0, 0, 0, 0 };
 
     ohm->update();
 
@@ -119,6 +119,7 @@ cpu_info_t PerfReader::getCPUInfo()
     cpuInfo.cpuClockSecondary = clock.second;
 
     cpuInfo.cpuTemp = ohm->getCpuPkgTemp();
+    cpuInfo.cpuCoreVoltage = ohm->getCpuCoreVoltage();
     cpuInfo.cpuPower = ohm->getCpuPkgPower();
 
     return cpuInfo;
