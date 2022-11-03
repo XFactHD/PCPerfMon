@@ -3,9 +3,7 @@
 void OHMWrapper::init()
 {
     ohm = new QProcess();
-    //ohm->setProgram("ohm_reader.exe");
-    ohm->setProgram("java");
-    ohm->setArguments({"Main"});
+    ohm->setProgram("ohm_reader.exe");
     connect(ohm, &QProcess::readyReadStandardError, this, &OHMWrapper::stderrReadyRead);
 
     ohm->start(QIODevice::ReadWrite | QIODevice::Unbuffered);
