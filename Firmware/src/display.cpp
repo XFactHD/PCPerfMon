@@ -15,6 +15,7 @@ const char* netUnits[] = { "KBit/s", "MBit/s", "GBit/s" };
 
 bool darkMode = false;
 bool hybridCpu = false;
+uint32_t lastData = 0;
 uint8_t brightness = 255;
 uint16_t colorLine = 0;
 uint16_t colorHeader = 0;
@@ -79,6 +80,9 @@ void drawBackground() {
 
     display.setTextSize(1);
     display.setTextColor(colorText, colorBackground);
+
+    display.setCursor(20, 229);
+    display.printf("| Interval:    - ms | Draw:   - ms");
 }
 
 void printLabels() {
@@ -182,10 +186,16 @@ void printLabels() {
 
 void drawConnection(bool connected) {
     display.fillCircle(7, 232, 4, connected ? TFT_GREEN : TFT_RED);
+    if (!connected) {
+        lastData = 0;
+    }
 }
 
 void printData(uint8_t* data, uint8_t length) {
     if (length % sizeof(data_point_t) == 0) {
+        uint32_t prevLastData = lastData;
+        lastData = millis();
+
         uint32_t start = millis();
         auto* points = (data_point_t*)data;
         unsigned int count = length / sizeof(data_point_t);
@@ -331,9 +341,10 @@ void printData(uint8_t* data, uint8_t length) {
         }
 
         uint32_t end = millis();
-        display.setCursor(14, 229);
-        display.print(end - start);
-        display.print(" ms");
+        display.setCursor(92, 229);
+        printClampedOrDefault(lastData - prevLastData, 9999, 4, '-', prevLastData != 0);
+        display.setCursor(188, 229);
+        printClampedOrDefault(end - start, 999, 3, '-', true);
     }
 }
 
@@ -344,6 +355,18 @@ void printScientific(double value, double divider, int len, int decimals, const 
             break;
         }
         value /= divider;
+    }
+}
+
+void printClampedOrDefault(uint32_t value, uint32_t max, int width, char placeholder, bool condition)
+{
+    if (condition)
+    {
+        display.printf("%*u", width, min(value, max));
+    }
+    else
+    {
+        display.printf("%*c", width, placeholder);
     }
 }
 
