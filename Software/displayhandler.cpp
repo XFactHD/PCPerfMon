@@ -36,13 +36,14 @@ void DisplayHandler::perfdataReady(cpu_info_t cpuInfo, ram_info_t ramInfo, net_i
 
     data[idx++] = { data_type_t::CPU_LOAD, (uint64_t)std::round(cpuInfo.cpuLoad * 100.0f)};
     data[idx++] = { data_type_t::CPU_CLOCK, cpuInfo.cpuClockMain };
-    if (hybridCpu) { data[idx++] = { data_type_t::CPU_CLOCK_SEC, cpuInfo.cpuClockSecondary }; }
+    data[idx++] = { data_type_t::CPU_CLOCK_SEC, cpuInfo.cpuClockSecondary };
     data[idx++] = { data_type_t::CPU_TEMP, (uint64_t)cpuInfo.cpuTemp };
     data[idx++] = { data_type_t::CPU_CORE_VOLTAGE, (uint64_t)cpuInfo.cpuCoreVoltage };
     data[idx++] = { data_type_t::CPU_POWER, cpuInfo.cpuPower };
     data[idx++] = { data_type_t::RAM_LOAD, (uint64_t)ramInfo.ramLoad };
     data[idx++] = { data_type_t::RAM_TOTAL, ramInfo.ramTotal };
     data[idx++] = { data_type_t::RAM_USED, ramInfo.ramUsed };
+    data[idx++] = { data_type_t::NET_BANDWIDTH, (uint64_t)(netInfo.bandwidth * 100.0) };
     data[idx++] = { data_type_t::NET_IN, (uint64_t)(netInfo.netIn * 100.0) };
     data[idx++] = { data_type_t::NET_OUT, (uint64_t)(netInfo.netOut * 100.0) };
     data[idx++] = { data_type_t::GPU_LOAD, (uint64_t)gpuInfo.gpuLoad };
