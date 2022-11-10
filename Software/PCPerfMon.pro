@@ -22,21 +22,21 @@ indev {
 SOURCES += \
     dialogoptions.cpp \
     displayhandler.cpp \
+    lhmreader.cpp \
     main.cpp \
     mainwindow.cpp \
     nvmlreader.cpp \
-    ohmwrapper.cpp \
     perfreader.cpp \
     widgetstartup.cpp
 
 HEADERS += \
     dialogoptions.h \
     displayhandler.h \
+    lhmreader.h \
     mainwindow.h \
     nvml.h \
     nvmldefs.h \
     nvmlreader.h \
-    ohmwrapper.h \
     perfreader.h \
     widgetstartup.h
 

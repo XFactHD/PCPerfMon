@@ -12,7 +12,7 @@ PerfReader::~PerfReader()
     }
 
     delete gpu;
-    delete ohm;
+    delete lhm;
 }
 
 void PerfReader::run()
@@ -59,9 +59,9 @@ void PerfReader::initialize()
     emit startupStage("Start NvMLReader");
     gpu = new NvMLReader();
     gpu->init();
-    emit startupStage("Start OHMWrapper");
-    ohm = new OHMWrapper();
-    ohm->init();
+    emit startupStage("Start LHMReader");
+    lhm = new LHMReader();
+    lhm->init();
     emit startupStage("PerfReader ready");
 }
 
@@ -95,7 +95,7 @@ void PerfReader::shutdown()
     if(query != NULL) { PdhCloseQuery(query); }
 
     gpu->shutdown();
-    ohm->shutdown();
+    lhm->shutdown();
 }
 
 
@@ -112,15 +112,15 @@ cpu_info_t PerfReader::getCPUInfo()
 {
     cpu_info_t cpuInfo = { getCPULoad(), 0, 0, 0, 0, 0 };
 
-    ohm->update();
+    lhm->update();
 
-    std::pair<uint16_t, uint16_t> clock = ohm->getCpuClockAvg();
+    std::pair<uint16_t, uint16_t> clock = lhm->getCpuClockAvg();
     cpuInfo.cpuClockMain = clock.first;
     cpuInfo.cpuClockSecondary = clock.second;
 
-    cpuInfo.cpuTemp = ohm->getCpuPkgTemp();
-    cpuInfo.cpuCoreVoltage = ohm->getCpuCoreVoltage();
-    cpuInfo.cpuPower = ohm->getCpuPkgPower();
+    cpuInfo.cpuTemp = lhm->getCpuPkgTemp();
+    cpuInfo.cpuCoreVoltage = lhm->getCpuCoreVoltage();
+    cpuInfo.cpuPower = lhm->getCpuPkgPower();
 
     return cpuInfo;
 }

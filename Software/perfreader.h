@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
+#include <QEventLoop>
 
 #include <iostream>
 
@@ -12,7 +13,7 @@
 #include <pdhmsg.h>
 
 #include "nvmlreader.h"
-#include "ohmwrapper.h"
+#include "lhmreader.h"
 
 //#define DEBUG
 
@@ -138,7 +139,7 @@ private:
 
     double netBandwidth = -1.0;
     NvMLReader* gpu;
-    OHMWrapper* ohm;
+    LHMReader* lhm;
 };
 
 #endif // PERFREADER_H
