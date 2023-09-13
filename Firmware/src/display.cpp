@@ -272,16 +272,16 @@ void printData(uint8_t* data, uint8_t length) {
                 case data_type_t::NET_IN: {
                     if (dataPoint.data >= 0 && dataPoint.data <= 999999999) {
                         display.setCursor(170, 55);
-                        double netIn = (float) dataPoint.data / 100.0;
-                        printScientific(netIn, 1000.0, 5, 1, netUnits, 2);
+                        float netIn = (float) dataPoint.data / 100.0F;
+                        printScientific(netIn, 1000.0F, 5, 1, netUnits, 2);
                     }
                     break;
                 }
                 case data_type_t::NET_OUT: {
                     if (dataPoint.data >= 0 && dataPoint.data <= 999999999) {
                         display.setCursor(170, 80);
-                        double netOut = (float) dataPoint.data / 100.0;
-                        printScientific(netOut, 1000.0, 5, 1, netUnits, 2);
+                        float netOut = (float) dataPoint.data / 100.0F;
+                        printScientific(netOut, 1000.0F, 5, 1, netUnits, 2);
                     }
                     break;
                 }
@@ -348,10 +348,12 @@ void printData(uint8_t* data, uint8_t length) {
     }
 }
 
-void printScientific(double value, double divider, int len, int decimals, const char** units, int steps) {
+void printScientific(float value, float divider, int len, int decimals, const char** units, int steps) {
+    float fracFactor = 10.0F * (float) decimals;
     for (int i = 0; i < steps; ++i) {
-        if (value < divider) {
-            display.printf("%*.*f%s", len, decimals, value, units[i]);
+        float dispValue = round(value * fracFactor) / fracFactor;
+        if (dispValue < divider) {
+            display.printf("%*.*f%s", len, decimals, dispValue, units[i]);
             break;
         }
         value /= divider;

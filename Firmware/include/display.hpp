@@ -10,6 +10,9 @@
 #include "data.hpp"
 #include "cmd.hpp"
 
+// Undefine Arduino round macro to use cmath round function instead
+#undef round
+
 #define PCB_V1
 
 #ifdef __IMXRT1062__
@@ -43,7 +46,7 @@ void printLabels();
 void drawConnection(bool connected);
 
 void printData(uint8_t* data, uint8_t length);
-void printScientific(double value, double divider, int len, int decimals, const char** units, int steps);
+void printScientific(float value, float divider, int len, int decimals, const char** units, int steps);
 void printClampedOrDefault(uint32_t value, uint32_t max, int width, char placeholder, bool condition);
 
 void enableDisplay();
