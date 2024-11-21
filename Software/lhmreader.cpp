@@ -2,6 +2,7 @@
 
 void LHMReader::init()
 {
+#ifdef USE_VULNERABLE_DRIVER
     handle = LoadLibraryA("./lhm/LhmReaderLib.dll");
     if (!handle) {
         qWarning("[LHMWrapper] Failed to find LhmReaderLib");
@@ -29,6 +30,9 @@ void LHMReader::init()
 
     ready = true;
     qInfo("[LHMReader] LhmReader ready");
+#else
+    qInfo("[LHMReader] LhmReader not present");
+#endif
 }
 
 void LHMReader::update()

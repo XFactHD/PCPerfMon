@@ -5,6 +5,8 @@
 
 #include "windows.h"
 
+//#define USE_VULNERABLE_DRIVER
+
 typedef bool (*lhm_init_t)(void);
 typedef void (*lhm_shutdown_t)(void);
 typedef void (*lhm_update_t)(void);
